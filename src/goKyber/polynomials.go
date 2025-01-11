@@ -133,36 +133,36 @@ func SamplePolyFromSeed(seed []byte, nonce byte, kVariant int) Polynomial {
 	case 2:
 		l := paramsETAK512 * paramsN / 4
 		p := indcpaPrf(l, seed, nonce)
-		return ByteOpsCBD(p, kVariant)
+		return CenteredBinomialFromUniform(p, kVariant)
 	default:
 		l := paramsETAK768K1024 * paramsN / 4
 		p := indcpaPrf(l, seed, nonce)
-		return ByteOpsCBD(p, kVariant)
+		return CenteredBinomialFromUniform(p, kVariant)
 	}
 }
 
 // PolyNTT computes a negacyclic number-theoretic transform (NTT) of a polynomial.
 func PolyNTT(inputPoly Polynomial) Polynomial {
-	return ntt(inputPoly)
+	return ForwardNTT(inputPoly)
 }
 
 // PolyInvNTTToMont computes the inverse of a negacyclic number-theoretic transform (NTT) of a polynomial.
 func PolyInvNTTToMont(inputPoly Polynomial) Polynomial {
-	return nttInv(inputPoly)
+	return InverseNTT(inputPoly)
 }
 
 // PolyBaseMul performs the multiplication of two polynomials in the NTT domain.
 func PolyBaseMul(aPoly Polynomial, bPoly Polynomial) Polynomial {
 	for i := 0; i < paramsN/4; i++ {
-		aPoly[4*i+0], aPoly[4*i+1] = nttBaseMul(
+		aPoly[4*i+0], aPoly[4*i+1] = BaseMul(
 			aPoly[4*i+0], aPoly[4*i+1],
 			bPoly[4*i+0], bPoly[4*i+1],
-			nttZetas[64+i],
+			nttTwiddleFactors[64+i],
 		)
-		aPoly[4*i+2], aPoly[4*i+3] = nttBaseMul(
+		aPoly[4*i+2], aPoly[4*i+3] = BaseMul(
 			aPoly[4*i+2], aPoly[4*i+3],
 			bPoly[4*i+2], bPoly[4*i+3],
-			-nttZetas[64+i],
+			-nttTwiddleFactors[64+i],
 		)
 	}
 	return aPoly
@@ -172,7 +172,7 @@ func PolyBaseMul(aPoly Polynomial, bPoly Polynomial) Polynomial {
 func PolyToMont(inputPoly Polynomial) Polynomial {
 	var f int16 = int16((uint64(1) << 32) % uint64(paramsQ))
 	for i := 0; i < paramsN; i++ {
-		inputPoly[i] = ByteOpsMontgomeryReduce(int32(inputPoly[i]) * int32(f))
+		inputPoly[i] = MontgomeryReduce(int32(inputPoly[i]) * int32(f))
 	}
 	return inputPoly
 }
@@ -180,7 +180,7 @@ func PolyToMont(inputPoly Polynomial) Polynomial {
 // PolyReduce applies Barrett reduction to all coefficients of a polynomial.
 func PolyReduce(inputPoly Polynomial) Polynomial {
 	for i := 0; i < paramsN; i++ {
-		inputPoly[i] = ByteOpsBarrettReduce(inputPoly[i])
+		inputPoly[i] = BarrettReduce(inputPoly[i])
 	}
 	return inputPoly
 }
@@ -188,7 +188,7 @@ func PolyReduce(inputPoly Polynomial) Polynomial {
 // PolyConditionalSubQ applies the conditional subtraction of Q to each coefficient of a polynomial.
 func PolyConditionalSubQ(inputPoly Polynomial) Polynomial {
 	for i := 0; i < paramsN; i++ {
-		inputPoly[i] = ByteOpsCSubQ(inputPoly[i])
+		inputPoly[i] = ConditionalSubQ(inputPoly[i])
 	}
 	return inputPoly
 }
