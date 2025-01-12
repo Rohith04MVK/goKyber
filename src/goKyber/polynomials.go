@@ -6,7 +6,22 @@ type Polynomial [384]int16
 // PolynomialVector represents a vector of polynomials.
 type PolynomialVector []Polynomial
 
-// CompressPolynomial compresses and serializes a polynomial.
+// CompressPolynomial compresses a given polynomial based on the specified kVariant.
+//
+// Parameters:
+// - inputPoly: The polynomial to be compressed.
+// - kVariant: Determines the compression mode. It can be either 2, 3, or any other value.
+//
+// Returns:
+// - A byte slice containing the compressed polynomial.
+//
+// Compression Modes:
+// - If kVariant is 2 or 3: The polynomial is compressed into 128 bytes.
+// - For any other kVariant: The polynomial is compressed into 160 bytes.
+//
+// The function first conditionally reduces the polynomial and then compresses it
+// by iterating over its coefficients and applying bitwise operations to pack them
+// into the output byte slice.
 func CompressPolynomial(inputPoly Polynomial, kVariant int) []byte {
 	temp := make([]byte, 8)
 	inputPoly = PolyConditionalSubQ(inputPoly)
@@ -42,38 +57,21 @@ func CompressPolynomial(inputPoly Polynomial, kVariant int) []byte {
 	}
 }
 
-// DecompressPolynomial decompresses and de-serializes a polynomial.
-func DecompressPolynomial(inputBytes []byte, kVariant int) Polynomial {
-	var resultPoly Polynomial
-	temp := make([]byte, 8)
-	inputByteIndex := 0
-	switch kVariant {
-	case 2, 3:
-		for i := 0; i < paramsN/2; i++ {
-			resultPoly[2*i+0] = int16(((uint16(inputBytes[inputByteIndex]&15) * uint16(paramsQ)) + 8) >> 4)
-			resultPoly[2*i+1] = int16(((uint16(inputBytes[inputByteIndex]>>4) * uint16(paramsQ)) + 8) >> 4)
-			inputByteIndex = inputByteIndex + 1
-		}
-	case 4:
-		for i := 0; i < paramsN/8; i++ {
-			temp[0] = (inputBytes[inputByteIndex+0] >> 0)
-			temp[1] = (inputBytes[inputByteIndex+0] >> 5) | (inputBytes[inputByteIndex+1] << 3)
-			temp[2] = (inputBytes[inputByteIndex+1] >> 2)
-			temp[3] = (inputBytes[inputByteIndex+1] >> 7) | (inputBytes[inputByteIndex+2] << 1)
-			temp[4] = (inputBytes[inputByteIndex+2] >> 4) | (inputBytes[inputByteIndex+3] << 4)
-			temp[5] = (inputBytes[inputByteIndex+3] >> 1)
-			temp[6] = (inputBytes[inputByteIndex+3] >> 6) | (inputBytes[inputByteIndex+4] << 2)
-			temp[7] = (inputBytes[inputByteIndex+4] >> 3)
-			inputByteIndex = inputByteIndex + 5
-			for j := 0; j < 8; j++ {
-				resultPoly[8*i+j] = int16(((uint32(temp[j]&31) * uint32(paramsQ)) + 16) >> 5)
-			}
-		}
-	}
-	return resultPoly
-}
-
-// SerializePolynomial serializes a polynomial into an array of bytes.
+// SerializePolynomial converts a Polynomial into a byte array representation.
+// This function processes the input polynomial by first conditionally reducing
+// its coefficients and then serializing them into a byte array. The serialization
+// is done by packing two 16-bit coefficients into three bytes.
+//
+// Parameters:
+// - inputPoly: The Polynomial to be serialized.
+//
+// Returns:
+// - A byte array representing the serialized polynomial.
+//
+// Modes:
+//   - The function operates in a mode where it processes pairs of coefficients
+//     from the input polynomial, packs them into three bytes, and stores them
+//     in the output byte array.
 func SerializePolynomial(inputPoly Polynomial) []byte {
 	var t0, t1 uint16
 	outputBytes := make([]byte, paramsPolyBytes)
@@ -88,7 +86,24 @@ func SerializePolynomial(inputPoly Polynomial) []byte {
 	return outputBytes
 }
 
-// DeserializePolynomial de-serializes an array of bytes into a polynomial.
+// DeserializePolynomial converts a byte array into a Polynomial structure.
+//
+// The function takes an input byte slice and processes it to extract polynomial coefficients.
+// Each coefficient is represented using 12 bits, and the function extracts these coefficients
+// from the byte array in a specific manner. The coefficients are stored in the resultPoly array.
+//
+// The function assumes that the input byte slice is of appropriate length to represent
+// the polynomial coefficients. The length of the input byte slice should be paramsN/2 * 3.
+//
+// Modes:
+//   - The function operates in a straightforward mode where it processes the input bytes
+//     sequentially to extract the polynomial coefficients.
+//
+// Parameters:
+// - inputBytes: A byte slice containing the serialized polynomial data.
+//
+// Returns:
+// - A Polynomial structure with the deserialized coefficients.
 func DeserializePolynomial(inputBytes []byte) Polynomial {
 	var resultPoly Polynomial
 	for i := 0; i < paramsN/2; i++ {
@@ -98,7 +113,19 @@ func DeserializePolynomial(inputBytes []byte) Polynomial {
 	return resultPoly
 }
 
-// ConvertMsgToPoly converts a 32-byte message to a polynomial.
+// ConvertMsgToPoly converts a given message (byte array) into a polynomial.
+// The function iterates over each bit of the message and maps it to a polynomial coefficient.
+// If the bit is 1, the corresponding coefficient is set to (paramsQ+1)/2, otherwise it is set to 0.
+//
+// Parameters:
+// - msg: A byte array representing the message to be converted.
+//
+// Returns:
+// - Polynomial: A polynomial representation of the input message.
+//
+// Modes:
+// - The function processes the message in chunks of 8 bits (1 byte) at a time.
+// - For each bit in the byte, it calculates a mask and sets the corresponding polynomial coefficient.
 func ConvertMsgToPoly(msg []byte) Polynomial {
 	var resultPoly Polynomial
 	var mask int16
@@ -111,7 +138,22 @@ func ConvertMsgToPoly(msg []byte) Polynomial {
 	return resultPoly
 }
 
-// ConvertPolyToMsg converts a polynomial to a 32-byte message.
+// ConvertPolyToMsg converts a polynomial to a message byte array.
+//
+// This function takes an input polynomial and processes it to produce a byte array
+// representation of the message. The polynomial is first conditionally reduced
+// using PolyConditionalSubQ. Then, for each group of 8 coefficients, it calculates
+// a corresponding byte in the message array.
+//
+// The function operates in the following modes:
+// - Normal Mode: Converts each coefficient of the polynomial to a bit in the message byte.
+// - Conditional Subtraction Mode: Ensures the polynomial coefficients are within a certain range before conversion.
+//
+// Parameters:
+// - inputPoly: The polynomial to be converted.
+//
+// Returns:
+// - A byte array representing the message.
 func ConvertPolyToMsg(inputPoly Polynomial) []byte {
 	msg := make([]byte, paramsSymBytes)
 	var t uint32
@@ -151,7 +193,23 @@ func PolyInvNTTToMont(inputPoly Polynomial) Polynomial {
 	return InverseNTT(inputPoly)
 }
 
-// PolyBaseMul performs the multiplication of two polynomials in the NTT domain.
+// PolyBaseMul performs element-wise multiplication of two polynomials
+// in the NTT (Number Theoretic Transform) domain using base multiplication.
+//
+// Parameters:
+// - aPoly: The first input polynomial.
+// - bPoly: The second input polynomial.
+//
+// Returns:
+// - A new polynomial resulting from the element-wise multiplication of aPoly and bPoly.
+//
+// The function iterates over the polynomials in chunks of 4 elements and applies
+// the BaseMul function to each pair of elements from aPoly and bPoly. The twiddle
+// factors used in the multiplication are taken from the nttTwiddleFactors array.
+//
+// Modes:
+// - The first two elements in each chunk are multiplied using a positive twiddle factor.
+// - The last two elements in each chunk are multiplied using a negative twiddle factor.
 func PolyBaseMul(aPoly Polynomial, bPoly Polynomial) Polynomial {
 	for i := 0; i < paramsN/4; i++ {
 		aPoly[4*i+0], aPoly[4*i+1] = BaseMul(
@@ -215,7 +273,19 @@ func NewPolyVector(kVariant int) PolynomialVector {
 	return pv
 }
 
-// CompressPolyVector compresses and serializes a vector of polynomials.
+// CompressPolyVector compresses a polynomial vector into a byte array based on the given kVariant.
+// The function first conditionally reduces the polynomial coefficients and then compresses them
+// into a byte array. The compression method varies depending on the kVariant value.
+//
+// Parameters:
+// - polyVec: The polynomial vector to be compressed.
+// - kVariant: Determines the compression mode and the size of the resulting byte array.
+//   - 2: Uses paramsPolyvecCompressedBytesK512 for the byte array size and compresses in chunks of 4.
+//   - 3: Uses paramsPolyvecCompressedBytesK768 for the byte array size and compresses in chunks of 4.
+//   - 4: Uses paramsPolyvecCompressedBytesK1024 for the byte array size and compresses in chunks of 8.
+//
+// Returns:
+// - A byte array containing the compressed polynomial vector.
 func CompressPolyVector(polyVec PolynomialVector, kVariant int) []byte {
 	var resultBytes []byte
 	PolyVecConditionalSubQ(polyVec, kVariant)
@@ -270,7 +340,20 @@ func CompressPolyVector(polyVec PolynomialVector, kVariant int) []byte {
 	}
 }
 
-// DecompressPolyVector de-serializes and decompresses a vector of polynomials.
+// DecompressPolyVector decompresses a byte array into a PolynomialVector based on the given kVariant.
+//
+// Parameters:
+// - inputBytes: A byte array containing the compressed polynomial vector data.
+// - kVariant: An integer indicating the mode of decompression. It can be 2, 3, or 4.
+//
+// Returns:
+// - A PolynomialVector that has been decompressed from the input byte array.
+//
+// The function supports three modes of decompression based on the value of kVariant:
+// - kVariant 2 or 3: Decompresses the inputBytes into a PolynomialVector with 2 or 3 polynomials respectively.
+// - kVariant 4: Decompresses the inputBytes into a PolynomialVector with 4 polynomials.
+//
+// The decompression process involves reading specific bits from the inputBytes and converting them into polynomial coefficients.
 func DecompressPolyVector(inputBytes []byte, kVariant int) PolynomialVector {
 	resultPolyVec := NewPolyVector(kVariant)
 	inputByteIndex := 0
@@ -311,7 +394,18 @@ func DecompressPolyVector(inputBytes []byte, kVariant int) PolynomialVector {
 	return resultPolyVec
 }
 
-// SerializePolyVector serializes a vector of polynomials.
+// SerializePolyVector takes a PolynomialVector and an integer kVariant, and returns a byte slice.
+// It serializes each polynomial in the vector up to the kVariant length.
+//
+// Parameters:
+// - polyVec: The PolynomialVector to be serialized.
+// - kVariant: The number of polynomials to serialize from the vector.
+//
+// Returns:
+// - A byte slice containing the serialized polynomials.
+//
+// Modes:
+// - kVariant determines how many polynomials from the vector will be serialized.
 func SerializePolyVector(polyVec PolynomialVector, kVariant int) []byte {
 	resultBytes := []byte{}
 	for i := 0; i < kVariant; i++ {
@@ -320,7 +414,22 @@ func SerializePolyVector(polyVec PolynomialVector, kVariant int) []byte {
 	return resultBytes
 }
 
-// DeserializePolyVector deserializes a vector of polynomials.
+// DeserializePolyVector takes a byte array and an integer kVariant as input,
+// and returns a PolynomialVector. The function processes the input byte array
+// by dividing it into segments based on the kVariant value. Each segment is
+// then deserialized into a Polynomial and stored in the resulting PolynomialVector.
+//
+// Parameters:
+// - inputBytes: A byte array containing the serialized polynomial data.
+// - kVariant: An integer representing the number of polynomials to deserialize.
+//
+// The function operates in different modes based on the value of kVariant:
+// - If kVariant is 2, it processes the inputBytes into 2 polynomials.
+// - If kVariant is 3, it processes the inputBytes into 3 polynomials.
+// - If kVariant is 4, it processes the inputBytes into 4 polynomials.
+//
+// Returns:
+// - A PolynomialVector containing the deserialized polynomials.
 func DeserializePolyVector(inputBytes []byte, kVariant int) PolynomialVector {
 	resultPolyVec := NewPolyVector(kVariant)
 	for i := 0; i < kVariant; i++ {
