@@ -174,11 +174,11 @@ func SamplePolyFromSeed(seed []byte, nonce byte, kVariant int) Polynomial {
 	switch kVariant {
 	case 2:
 		l := paramsETAK512 * paramsN / 4
-		p := indcpaPrf(l, seed, nonce)
+		p := PseudoRandomFunction(l, seed, nonce)
 		return CenteredBinomialFromUniform(p, kVariant)
 	default:
 		l := paramsETAK768K1024 * paramsN / 4
-		p := indcpaPrf(l, seed, nonce)
+		p := PseudoRandomFunction(l, seed, nonce)
 		return CenteredBinomialFromUniform(p, kVariant)
 	}
 }
@@ -392,6 +392,51 @@ func DecompressPolyVector(inputBytes []byte, kVariant int) PolynomialVector {
 		}
 	}
 	return resultPolyVec
+}
+
+// DecompressPolynomial takes a compressed polynomial in the form of a byte slice
+// and decompresses it into a Polynomial structure based on the specified kVariant.
+//
+// Parameters:
+// - inputBytes: A byte slice containing the compressed polynomial data.
+// - kVariant: An integer specifying the mode of decompression. It can be one of the following:
+//   - 2 or 3: Decompresses the polynomial using a method suitable for these variants.
+//   - 4: Decompresses the polynomial using a method suitable for this variant.
+//
+// Returns:
+// - A decompressed Polynomial structure.
+//
+// The function processes the inputBytes differently based on the kVariant value:
+// - For kVariant 2 or 3: Each byte is split into two 4-bit values, which are then scaled and stored in the result polynomial.
+// - For kVariant 4: Each group of 5 bytes is split into eight 5-bit values, which are then scaled and stored in the result polynomial.
+func DecompressPolynomial(inputBytes []byte, kVariant int) Polynomial {
+	var resultPoly Polynomial
+	temp := make([]byte, 8)
+	inputByteIndex := 0
+	switch kVariant {
+	case 2, 3:
+		for i := 0; i < paramsN/2; i++ {
+			resultPoly[2*i+0] = int16(((uint16(inputBytes[inputByteIndex]&15) * uint16(paramsQ)) + 8) >> 4)
+			resultPoly[2*i+1] = int16(((uint16(inputBytes[inputByteIndex]>>4) * uint16(paramsQ)) + 8) >> 4)
+			inputByteIndex = inputByteIndex + 1
+		}
+	case 4:
+		for i := 0; i < paramsN/8; i++ {
+			temp[0] = (inputBytes[inputByteIndex+0] >> 0)
+			temp[1] = (inputBytes[inputByteIndex+0] >> 5) | (inputBytes[inputByteIndex+1] << 3)
+			temp[2] = (inputBytes[inputByteIndex+1] >> 2)
+			temp[3] = (inputBytes[inputByteIndex+1] >> 7) | (inputBytes[inputByteIndex+2] << 1)
+			temp[4] = (inputBytes[inputByteIndex+2] >> 4) | (inputBytes[inputByteIndex+3] << 4)
+			temp[5] = (inputBytes[inputByteIndex+3] >> 1)
+			temp[6] = (inputBytes[inputByteIndex+3] >> 6) | (inputBytes[inputByteIndex+4] << 2)
+			temp[7] = (inputBytes[inputByteIndex+4] >> 3)
+			inputByteIndex = inputByteIndex + 5
+			for j := 0; j < 8; j++ {
+				resultPoly[8*i+j] = int16(((uint32(temp[j]&31) * uint32(paramsQ)) + 16) >> 5)
+			}
+		}
+	}
+	return resultPoly
 }
 
 // SerializePolyVector takes a PolynomialVector and an integer kVariant, and returns a byte slice.
