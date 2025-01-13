@@ -26,13 +26,13 @@ var nttZetasInv [128]int16 = [128]int16{
 	3127, 3042, 1907, 1836, 1517, 359, 758, 1441,
 }
 
-// nttFqMul performs multiplication followed by Montgomery reduction
+// NttFqMul performs multiplication followed by Montgomery reduction
 // and returns a 16-bit integer congruent to `a*b*R^{-1} mod Q`.
-func nttFqMul(a int16, b int16) int16 {
-	return byteopsMontgomeryReduce(int32(a) * int32(b))
+func NttFqMul(a int16, b int16) int16 {
+	return ByteopsMontgomeryReduce(int32(a) * int32(b))
 }
 
-// ntt performs the Number Theoretic Transform (NTT) on a polynomial.
+// Ntt performs the Number Theoretic Transform (NTT) on a polynomial.
 //
 // The NTT is a specialized version of the Fast Fourier Transform (FFT)
 // that operates in a finite field, making it suitable for cryptographic
@@ -54,7 +54,7 @@ func nttFqMul(a int16, b int16) int16 {
 //
 // Returns:
 // - The transformed polynomial in its NTT representation.
-func ntt(r poly) poly {
+func Ntt(r poly) poly {
 	j := 0
 	k := 1
 	for l := 128; l >= 2; l >>= 1 {
@@ -62,7 +62,7 @@ func ntt(r poly) poly {
 			zeta := nttZetas[k]
 			k = k + 1
 			for j = start; j < start+l; j++ {
-				t := nttFqMul(zeta, r[j+l])
+				t := NttFqMul(zeta, r[j+l])
 				r[j+l] = r[j] - t
 				r[j] = r[j] + t
 			}
@@ -71,7 +71,7 @@ func ntt(r poly) poly {
 	return r
 }
 
-// nttInv performs the inverse Number Theoretic Transform (NTT) on a polynomial.
+// NttInv performs the inverse Number Theoretic Transform (NTT) on a polynomial.
 // This function is used to convert data from the frequency domain back to the time domain.
 // The input is in bit-reversed order, the output is in standard order.
 //
@@ -86,7 +86,7 @@ func ntt(r poly) poly {
 //
 // Returns:
 // - The transformed polynomial in the time domain.
-func nttInv(r poly) poly {
+func NttInv(r poly) poly {
 	j := 0
 	k := 0
 	for l := 2; l <= 128; l <<= 1 {
@@ -95,27 +95,27 @@ func nttInv(r poly) poly {
 			k = k + 1
 			for j = start; j < start+l; j++ {
 				t := r[j]
-				r[j] = byteopsBarrettReduce(t + r[j+l])
+				r[j] = ByteopsBarrettReduce(t + r[j+l])
 				r[j+l] = t - r[j+l]
-				r[j+l] = nttFqMul(zeta, r[j+l])
+				r[j+l] = NttFqMul(zeta, r[j+l])
 			}
 		}
 	}
 	for j := 0; j < 256; j++ {
-		r[j] = nttFqMul(r[j], nttZetasInv[127])
+		r[j] = NttFqMul(r[j], nttZetasInv[127])
 	}
 	return r
 }
 
-// nttBaseMul performs a base multiplication operation used in the Number Theoretic Transform (NTT).
+// NttBaseMul performs a base multiplication operation used in the Number Theoretic Transform (NTT).
 // It takes two pairs of int16 values (a0, a1) and (b0, b1), and a zeta value.
 // The function returns a pair of int16 values resulting from the NTT base multiplication.
 // The operation involves modular arithmetic and multiplication of the inputs with the zeta value.
-func nttBaseMul(
+func NttBaseMul(
 	a0 int16, a1 int16,
 	b0 int16, b1 int16,
 	zeta int16,
 ) (int16, int16) {
-	return nttFqMul(nttFqMul(a1, b1), zeta) + nttFqMul(a0, b0),
-		nttFqMul(a0, b1) + nttFqMul(a1, b0)
+	return NttFqMul(NttFqMul(a1, b1), zeta) + NttFqMul(a0, b0),
+		NttFqMul(a0, b1) + NttFqMul(a1, b0)
 }

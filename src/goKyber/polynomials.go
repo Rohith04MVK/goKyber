@@ -6,22 +6,22 @@ type polyvec []poly
 // CompressPolynomial compresses a given polynomial based on the specified kVariant.
 //
 // Parameters:
-// - inputPoly: The polynomial to be compressed.
-// - kVariant: Determines the compression mode. It can be either 2, 3, or any other value.
+//   - inputPoly: The polynomial to be compressed.
+//   - kVariant: Determines the compression mode. It can be either 2, 3, or any other value.
 //
 // Returns:
-// - A byte slice containing the compressed polynomial.
+//   - A byte slice containing the compressed polynomial.
 //
 // Compression Modes:
-// - If kVariant is 2 or 3: The polynomial is compressed into 128 bytes.
-// - For any other kVariant: The polynomial is compressed into 160 bytes.
+//   - If kVariant is 2 or 3: The polynomial is compressed into 128 bytes.
+//   - For any other kVariant: The polynomial is compressed into 160 bytes.
 //
 // The function first conditionally reduces the polynomial and then compresses it
 // by iterating over its coefficients and applying bitwise operations to pack them
 // into the output byte slice.
-func polyCompress(inputPoly poly, kVariant int) []byte {
+func PolyCompress(inputPoly poly, kVariant int) []byte {
 	temp := make([]byte, 8)
-	inputPoly = polyCSubQ(inputPoly)
+	inputPoly = PolyCSubQ(inputPoly)
 	outputByteIndex := 0
 	switch kVariant {
 	case 2, 3:
@@ -54,11 +54,11 @@ func polyCompress(inputPoly poly, kVariant int) []byte {
 	}
 }
 
-// polyDecompress de-serializes and subsequently decompresses a polynomial,
-// representing the approximate inverse of polyCompress.
+// PolyDecompress de-serializes and subsequently decompresses a polynomial,
+// representing the approximate inverse of PolyCompress.
 // Note that compression is lossy, and thus decompression will not match the
 // original input.
-func polyDecompress(inputBytes []byte, kVariant int) poly {
+func PolyDecompress(inputBytes []byte, kVariant int) poly {
 	var resultPoly poly
 	temp := make([]byte, 8)
 	inputByteIndex := 0
@@ -94,19 +94,19 @@ func polyDecompress(inputBytes []byte, kVariant int) poly {
 // is done by packing two 16-bit coefficients into three bytes.
 //
 // Parameters:
-// - inputPoly: The Polynomial to be serialized.
+//   - inputPoly: The Polynomial to be serialized.
 //
 // Returns:
-// - A byte array representing the serialized polynomial.
+//   - A byte array representing the serialized polynomial.
 //
 // Modes:
 //   - The function operates in a mode where it processes pairs of coefficients
 //     from the input polynomial, packs them into three bytes, and stores them
 //     in the output byte array.
-func polyToBytes(inputPoly poly) []byte {
+func PolyToBytes(inputPoly poly) []byte {
 	var t0, t1 uint16
 	outputBytes := make([]byte, paramsPolyBytes)
-	inputPoly = polyCSubQ(inputPoly)
+	inputPoly = PolyCSubQ(inputPoly)
 	for i := 0; i < paramsN/2; i++ {
 		t0 = uint16(inputPoly[2*i])
 		t1 = uint16(inputPoly[2*i+1])
@@ -131,11 +131,11 @@ func polyToBytes(inputPoly poly) []byte {
 //     sequentially to extract the polynomial coefficients.
 //
 // Parameters:
-// - inputBytes: A byte slice containing the serialized polynomial data.
+//   - inputBytes: A byte slice containing the serialized polynomial data.
 //
 // Returns:
-// - A Polynomial structure with the deserialized coefficients.
-func polyFromBytes(inputBytes []byte) poly {
+//   - A Polynomial structure with the deserialized coefficients.
+func PolyFromBytes(inputBytes []byte) poly {
 	var resultPoly poly
 	for i := 0; i < paramsN/2; i++ {
 		resultPoly[2*i] = int16(((uint16(inputBytes[3*i+0]) >> 0) | (uint16(inputBytes[3*i+1]) << 8)) & 0xFFF)
@@ -149,15 +149,15 @@ func polyFromBytes(inputBytes []byte) poly {
 // If the bit is 1, the corresponding coefficient is set to (paramsQ+1)/2, otherwise it is set to 0.
 //
 // Parameters:
-// - msg: A byte array representing the message to be converted.
+//   - msg: A byte array representing the message to be converted.
 //
 // Returns:
-// - Polynomial: A polynomial representation of the input message.
+//   - Polynomial: A polynomial representation of the input message.
 //
 // Modes:
-// - The function processes the message in chunks of 8 bits (1 byte) at a time.
-// - For each bit in the byte, it calculates a mask and sets the corresponding polynomial coefficient.
-func polyFromMsg(msg []byte) poly {
+//   - The function processes the message in chunks of 8 bits (1 byte) at a time.
+//   - For each bit in the byte, it calculates a mask and sets the corresponding polynomial coefficient.
+func PolyFromMsg(msg []byte) poly {
 	var resultPoly poly
 	var mask int16
 	for i := 0; i < paramsN/8; i++ {
@@ -177,18 +177,18 @@ func polyFromMsg(msg []byte) poly {
 // a corresponding byte in the message array.
 //
 // The function operates in the following modes:
-// - Normal Mode: Converts each coefficient of the polynomial to a bit in the message byte.
-// - Conditional Subtraction Mode: Ensures the polynomial coefficients are within a certain range before conversion.
+//   - Normal Mode: Converts each coefficient of the polynomial to a bit in the message byte.
+//   - Conditional Subtraction Mode: Ensures the polynomial coefficients are within a certain range before conversion.
 //
 // Parameters:
-// - inputPoly: The polynomial to be converted.
+//   - inputPoly: The polynomial to be converted.
 //
 // Returns:
-// - A byte array representing the message.
-func polyToMsg(inputPoly poly) []byte {
+//   - A byte array representing the message.
+func PolyToMsg(inputPoly poly) []byte {
 	msg := make([]byte, paramsSymBytes)
 	var t uint32
-	inputPoly = polyCSubQ(inputPoly)
+	inputPoly = PolyCSubQ(inputPoly)
 	for i := 0; i < paramsN/8; i++ {
 		msg[i] = 0
 		for j := 0; j < 8; j++ {
@@ -200,61 +200,61 @@ func polyToMsg(inputPoly poly) []byte {
 	return msg
 }
 
-// polyGetNoise samples a polynomial deterministically from a seed
+// PolyGetNoise samples a polynomial deterministically from a seed
 // and nonce, with the output polynomial being close to a centered
 // binomial distribution.
-func polyGetNoise(seed []byte, nonce byte, kVariant int) poly {
+func PolyGetNoise(seed []byte, nonce byte, kVariant int) poly {
 	switch kVariant {
 	case 2:
 		l := paramsETAK512 * paramsN / 4
-		p := indcpaPrf(l, seed, nonce)
-		return byteopsCbd(p, kVariant)
+		p := IndcpaPrf(l, seed, nonce)
+		return ByteopsCbd(p, kVariant)
 	default:
 		l := paramsETAK768K1024 * paramsN / 4
-		p := indcpaPrf(l, seed, nonce)
-		return byteopsCbd(p, kVariant)
+		p := IndcpaPrf(l, seed, nonce)
+		return ByteopsCbd(p, kVariant)
 	}
 }
 
-// polyNtt computes a negacyclic number-theoretic transform (NTT) of
+// PolyNtt computes a negacyclic number-theoretic transform (NTT) of
 // a polynomial in-place; the input is assumed to be in normal order,
 // while the output is in bit-reversed order.
-func polyNtt(inputPoly poly) poly {
-	return ntt(inputPoly)
+func PolyNtt(inputPoly poly) poly {
+	return Ntt(inputPoly)
 }
 
-// polyInvNttToMont computes the inverse of a negacyclic number-theoretic
+// PolyInvNttToMont computes the inverse of a negacyclic number-theoretic
 // transform (NTT) of a polynomial in-place; the input is assumed to be in
 // bit-reversed order, while the output is in normal order.
-func polyInvNttToMont(inputPoly poly) poly {
-	return nttInv(inputPoly)
+func PolyInvNttToMont(inputPoly poly) poly {
+	return NttInv(inputPoly)
 }
 
 // PolyBaseMul performs element-wise multiplication of two polynomials
 // in the NTT (Number Theoretic Transform) domain using base multiplication.
 //
 // Parameters:
-// - aPoly: The first input polynomial.
-// - bPoly: The second input polynomial.
+//   - aPoly: The first input polynomial.
+//   - bPoly: The second input polynomial.
 //
 // Returns:
-// - A new polynomial resulting from the element-wise multiplication of aPoly and bPoly.
+//   - A new polynomial resulting from the element-wise multiplication of aPoly and bPoly.
 //
 // The function iterates over the polynomials in chunks of 4 elements and applies
 // the BaseMul function to each pair of elements from aPoly and bPoly. The twiddle
 // factors used in the multiplication are taken from the nttTwiddleFactors array.
 //
 // Modes:
-// - The first two elements in each chunk are multiplied using a positive twiddle factor.
-// - The last two elements in each chunk are multiplied using a negative twiddle factor.
-func polyBaseMulMontgomery(aPoly poly, bPoly poly) poly {
+//   - The first two elements in each chunk are multiplied using a positive twiddle factor.
+//   - The last two elements in each chunk are multiplied using a negative twiddle factor.
+func PolyBaseMulMontgomery(aPoly poly, bPoly poly) poly {
 	for i := 0; i < paramsN/4; i++ {
-		aPoly[4*i+0], aPoly[4*i+1] = nttBaseMul(
+		aPoly[4*i+0], aPoly[4*i+1] = NttBaseMul(
 			aPoly[4*i+0], aPoly[4*i+1],
 			bPoly[4*i+0], bPoly[4*i+1],
 			nttZetas[64+i],
 		)
-		aPoly[4*i+2], aPoly[4*i+3] = nttBaseMul(
+		aPoly[4*i+2], aPoly[4*i+3] = NttBaseMul(
 			aPoly[4*i+2], aPoly[4*i+3],
 			bPoly[4*i+2], bPoly[4*i+3],
 			-nttZetas[64+i],
@@ -263,51 +263,51 @@ func polyBaseMulMontgomery(aPoly poly, bPoly poly) poly {
 	return aPoly
 }
 
-// polyToMont performs the in-place conversion of all coefficients
+// PolyToMont performs the in-place conversion of all coefficients
 // of a polynomial from the normal domain to the Montgomery domain.
-func polyToMont(inputPoly poly) poly {
+func PolyToMont(inputPoly poly) poly {
 	var f int16 = int16((uint64(1) << 32) % uint64(paramsQ))
 	for i := 0; i < paramsN; i++ {
-		inputPoly[i] = byteopsMontgomeryReduce(int32(inputPoly[i]) * int32(f))
+		inputPoly[i] = ByteopsMontgomeryReduce(int32(inputPoly[i]) * int32(f))
 	}
 	return inputPoly
 }
 
-// polyReduce applies Barrett reduction to all coefficients of a polynomial.
-func polyReduce(inputPoly poly) poly {
+// PolyReduce applies Barrett reduction to all coefficients of a polynomial.
+func PolyReduce(inputPoly poly) poly {
 	for i := 0; i < paramsN; i++ {
-		inputPoly[i] = byteopsBarrettReduce(inputPoly[i])
+		inputPoly[i] = ByteopsBarrettReduce(inputPoly[i])
 	}
 	return inputPoly
 }
 
-// polyCSubQ applies the conditional subtraction of `Q` to each coefficient
+// PolyCSubQ applies the conditional subtraction of `Q` to each coefficient
 // of a polynomial.
-func polyCSubQ(inputPoly poly) poly {
+func PolyCSubQ(inputPoly poly) poly {
 	for i := 0; i < paramsN; i++ {
-		inputPoly[i] = byteopsCSubQ(inputPoly[i])
+		inputPoly[i] = ByteopsCSubQ(inputPoly[i])
 	}
 	return inputPoly
 }
 
-// polyAdd adds two polynomials.
-func polyAdd(aPoly poly, bPoly poly) poly {
+// PolyAdd adds two polynomials.
+func PolyAdd(aPoly poly, bPoly poly) poly {
 	for i := 0; i < paramsN; i++ {
 		aPoly[i] = aPoly[i] + bPoly[i]
 	}
 	return aPoly
 }
 
-// polySub subtracts two polynomials.
-func polySub(aPoly poly, bPoly poly) poly {
+// PolySub subtracts two polynomials.
+func PolySub(aPoly poly, bPoly poly) poly {
 	for i := 0; i < paramsN; i++ {
 		aPoly[i] = aPoly[i] - bPoly[i]
 	}
 	return aPoly
 }
 
-// polyvecNew instantiates a new vector of polynomials.
-func polyvecNew(kVariant int) polyvec {
+// PolyvecNew instantiates a new vector of polynomials.
+func PolyvecNew(kVariant int) polyvec {
 	var pv polyvec = make([]poly, kVariant)
 	return pv
 }
@@ -324,10 +324,10 @@ func polyvecNew(kVariant int) polyvec {
 //   - 4: Uses paramsPolyvecCompressedBytesK1024 for the byte array size and compresses in chunks of 8.
 //
 // Returns:
-// - A byte array containing the compressed polynomial vector.
-func polyvecCompress(polyVec polyvec, kVariant int) []byte {
+//   - A byte array containing the compressed polynomial vector.
+func PolyvecCompress(polyVec polyvec, kVariant int) []byte {
 	var resultBytes []byte
-	polyvecCSubQ(polyVec, kVariant)
+	PolyvecCSubQ(polyVec, kVariant)
 	resultByteIndex := 0
 	switch kVariant {
 	case 2:
@@ -382,19 +382,19 @@ func polyvecCompress(polyVec polyvec, kVariant int) []byte {
 // DecompressPolyVector decompresses a byte array into a PolynomialVector based on the given kVariant.
 //
 // Parameters:
-// - inputBytes: A byte array containing the compressed polynomial vector data.
-// - kVariant: An integer indicating the mode of decompression. It can be 2, 3, or 4.
+//   - inputBytes: A byte array containing the compressed polynomial vector data.
+//   - kVariant: An integer indicating the mode of decompression. It can be 2, 3, or 4.
 //
 // Returns:
-// - A PolynomialVector that has been decompressed from the input byte array.
+//   - A PolynomialVector that has been decompressed from the input byte array.
 //
 // The function supports three modes of decompression based on the value of kVariant:
-// - kVariant 2 or 3: Decompresses the inputBytes into a PolynomialVector with 2 or 3 polynomials respectively.
-// - kVariant 4: Decompresses the inputBytes into a PolynomialVector with 4 polynomials.
+//   - kVariant 2 or 3: Decompresses the inputBytes into a PolynomialVector with 2 or 3 polynomials respectively.
+//   - kVariant 4: Decompresses the inputBytes into a PolynomialVector with 4 polynomials.
 //
 // The decompression process involves reading specific bits from the inputBytes and converting them into polynomial coefficients.
-func polyvecDecompress(inputBytes []byte, kVariant int) polyvec {
-	resultPolyVec := polyvecNew(kVariant)
+func PolyvecDecompress(inputBytes []byte, kVariant int) polyvec {
+	resultPolyVec := PolyvecNew(kVariant)
 	inputByteIndex := 0
 	switch kVariant {
 	case 2, 3:
@@ -437,18 +437,18 @@ func polyvecDecompress(inputBytes []byte, kVariant int) polyvec {
 // It serializes each polynomial in the vector up to the kVariant length.
 //
 // Parameters:
-// - polyVec: The PolynomialVector to be serialized.
-// - kVariant: The number of polynomials to serialize from the vector.
+//   - polyVec: The PolynomialVector to be serialized.
+//   - kVariant: The number of polynomials to serialize from the vector.
 //
 // Returns:
-// - A byte slice containing the serialized polynomials.
+//   - A byte slice containing the serialized polynomials.
 //
 // Modes:
-// - kVariant determines how many polynomials from the vector will be serialized.
-func polyvecToBytes(polyVec polyvec, kVariant int) []byte {
+//   - kVariant determines how many polynomials from the vector will be serialized.
+func PolyvecToBytes(polyVec polyvec, kVariant int) []byte {
 	resultBytes := []byte{}
 	for i := 0; i < kVariant; i++ {
-		resultBytes = append(resultBytes, polyToBytes(polyVec[i])...)
+		resultBytes = append(resultBytes, PolyToBytes(polyVec[i])...)
 	}
 	return resultBytes
 }
@@ -459,73 +459,73 @@ func polyvecToBytes(polyVec polyvec, kVariant int) []byte {
 // then deserialized into a Polynomial and stored in the resulting PolynomialVector.
 //
 // Parameters:
-// - inputBytes: A byte array containing the serialized polynomial data.
-// - kVariant: An integer representing the number of polynomials to deserialize.
+//   - inputBytes: A byte array containing the serialized polynomial data.
+//   - kVariant: An integer representing the number of polynomials to deserialize.
 //
 // The function operates in different modes based on the value of kVariant:
-// - If kVariant is 2, it processes the inputBytes into 2 polynomials.
-// - If kVariant is 3, it processes the inputBytes into 3 polynomials.
-// - If kVariant is 4, it processes the inputBytes into 4 polynomials.
+//   - If kVariant is 2, it processes the inputBytes into 2 polynomials.
+//   - If kVariant is 3, it processes the inputBytes into 3 polynomials.
+//   - If kVariant is 4, it processes the inputBytes into 4 polynomials.
 //
 // Returns:
-// - A PolynomialVector containing the deserialized polynomials.
-func polyvecFromBytes(inputBytes []byte, kVariant int) polyvec {
-	resultPolyVec := polyvecNew(kVariant)
+//   - A PolynomialVector containing the deserialized polynomials.
+func PolyvecFromBytes(inputBytes []byte, kVariant int) polyvec {
+	resultPolyVec := PolyvecNew(kVariant)
 	for i := 0; i < kVariant; i++ {
 		startIndex := (i * paramsPolyBytes)
 		endIndex := (i + 1) * paramsPolyBytes
-		resultPolyVec[i] = polyFromBytes(inputBytes[startIndex:endIndex])
+		resultPolyVec[i] = PolyFromBytes(inputBytes[startIndex:endIndex])
 	}
 	return resultPolyVec
 }
 
-// polyvecNtt applies forward number-theoretic transforms (NTT)
+// PolyvecNtt applies forward number-theoretic transforms (NTT)
 // to all elements of a vector of polynomials.
-func polyvecNtt(polyVec polyvec, kVariant int) {
+func PolyvecNtt(polyVec polyvec, kVariant int) {
 	for i := 0; i < kVariant; i++ {
-		polyVec[i] = polyNtt(polyVec[i])
+		polyVec[i] = PolyNtt(polyVec[i])
 	}
 }
 
-// polyvecInvNttToMont applies the inverse number-theoretic transform (NTT)
+// PolyvecInvNttToMont applies the inverse number-theoretic transform (NTT)
 // to all elements of a vector of polynomials and multiplies by Montgomery
 // factor `2^16`.
-func polyvecInvNttToMont(polyVec polyvec, kVariant int) {
+func PolyvecInvNttToMont(polyVec polyvec, kVariant int) {
 	for i := 0; i < kVariant; i++ {
-		polyVec[i] = polyInvNttToMont(polyVec[i])
+		polyVec[i] = PolyInvNttToMont(polyVec[i])
 	}
 }
 
-// polyvecPointWiseAccMontgomery pointwise-multiplies elements of polynomial-vectors
+// PolyvecPointWiseAccMontgomery pointwise-multiplies elements of polynomial-vectors
 // `a` and `b`, accumulates the results into `r`, and then multiplies by `2^-16`.
-func polyvecPointWiseAccMontgomery(aVec polyvec, bVec polyvec, kVariant int) poly {
-	resultPoly := polyBaseMulMontgomery(aVec[0], bVec[0])
+func PolyvecPointWiseAccMontgomery(aVec polyvec, bVec polyvec, kVariant int) poly {
+	resultPoly := PolyBaseMulMontgomery(aVec[0], bVec[0])
 	for i := 1; i < kVariant; i++ {
-		tempPoly := polyBaseMulMontgomery(aVec[i], bVec[i])
-		resultPoly = polyAdd(resultPoly, tempPoly)
+		tempPoly := PolyBaseMulMontgomery(aVec[i], bVec[i])
+		resultPoly = PolyAdd(resultPoly, tempPoly)
 	}
-	return polyReduce(resultPoly)
+	return PolyReduce(resultPoly)
 }
 
-// polyvecReduce applies Barrett reduction to each coefficient of each element
+// PolyvecReduce applies Barrett reduction to each coefficient of each element
 // of a vector of polynomials.
-func polyvecReduce(polyVec polyvec, kVariant int) {
+func PolyvecReduce(polyVec polyvec, kVariant int) {
 	for i := 0; i < kVariant; i++ {
-		polyVec[i] = polyReduce(polyVec[i])
+		polyVec[i] = PolyReduce(polyVec[i])
 	}
 }
 
-// polyvecCSubQ applies the conditional subtraction of `Q` to each coefficient
+// PolyvecCSubQ applies the conditional subtraction of `Q` to each coefficient
 // of each element of a vector of polynomials.
-func polyvecCSubQ(polyVec polyvec, kVariant int) {
+func PolyvecCSubQ(polyVec polyvec, kVariant int) {
 	for i := 0; i < kVariant; i++ {
-		polyVec[i] = polyCSubQ(polyVec[i])
+		polyVec[i] = PolyCSubQ(polyVec[i])
 	}
 }
 
-// polyvecAdd adds two vectors of polynomials.
-func polyvecAdd(aVec polyvec, bVec polyvec, kVariant int) {
+// PolyvecAdd adds two vectors of polynomials.
+func PolyvecAdd(aVec polyvec, bVec polyvec, kVariant int) {
 	for i := 0; i < kVariant; i++ {
-		aVec[i] = polyAdd(aVec[i], bVec[i])
+		aVec[i] = PolyAdd(aVec[i], bVec[i])
 	}
 }

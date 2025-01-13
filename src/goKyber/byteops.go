@@ -1,13 +1,14 @@
 package gokyber
 
-// byteopsLoad32 converts a slice of 4 bytes into a single uint32 value.
+// ByteopsLoad32 converts a slice of 4 bytes into a single uint32 value.
 // It takes the first 4 bytes from the input slice and combines them into a uint32.
 // The bytes are combined in little-endian order, meaning the first byte is the least significant byte.
 //
 // Example:
-// inputBytes := []byte{0x01, 0x02, 0x03, 0x04}
-// result := byteopsLoad32(inputBytes) // result will be 0x04030201
-func byteopsLoad32(inputBytes []byte) uint32 {
+//
+//	inputBytes := []byte{0x01, 0x02, 0x03, 0x04}
+//	result := ByteopsLoad32(inputBytes) // result will be 0x04030201
+func ByteopsLoad32(inputBytes []byte) uint32 {
 	var result uint32
 	result = uint32(inputBytes[0])
 	result = result | (uint32(inputBytes[1]) << 8)
@@ -16,14 +17,14 @@ func byteopsLoad32(inputBytes []byte) uint32 {
 	return result
 }
 
-// byteopsLoad24 loads 3 bytes from the inputBytes slice and combines them into a single uint32 value.
+// ByteopsLoad24 loads 3 bytes from the inputBytes slice and combines them into a single uint32 value.
 // It takes the first byte as the least significant byte, the second byte shifted left by 8 bits,
 // and the third byte shifted left by 16 bits, then combines them using bitwise OR operations.
 //
 // Example:
 //
 //	inputBytes := []byte{0x01, 0x02, 0x03}
-//	result := byteopsLoad24(inputBytes) // result will be 0x00030201
+//	result := ByteopsLoad24(inputBytes) // result will be 0x00030201
 //
 // Parameters:
 //
@@ -32,7 +33,7 @@ func byteopsLoad32(inputBytes []byte) uint32 {
 // Returns:
 //
 //	A uint32 value representing the combined result of the first 3 bytes.
-func byteopsLoad24(inputBytes []byte) uint32 {
+func ByteopsLoad24(inputBytes []byte) uint32 {
 	var result uint32
 	result = uint32(inputBytes[0])
 	result = result | (uint32(inputBytes[1]) << 8)
@@ -40,7 +41,7 @@ func byteopsLoad24(inputBytes []byte) uint32 {
 	return result
 }
 
-// byteopsCbd processes a byte array and generates a polynomial based on the kVariant parameter.
+// ByteopsCbd processes a byte array and generates a polynomial based on the kVariant parameter.
 // The function supports two modes determined by kVariant: 2 and other values.
 //
 // For kVariant = 2:
@@ -56,7 +57,7 @@ func byteopsLoad24(inputBytes []byte) uint32 {
 // - Stores the result in the polynomial.
 //
 // The function uses bitwise operations and shifts to manipulate the input bytes and compute the polynomial coefficients.
-func byteopsCbd(uniformBytes []byte, kVariant int) poly {
+func ByteopsCbd(uniformBytes []byte, kVariant int) poly {
 	var t, d uint32
 	var a, b int16
 	var resultPoly poly
@@ -64,7 +65,7 @@ func byteopsCbd(uniformBytes []byte, kVariant int) poly {
 	case 2:
 		for i := 0; i < paramsN/4; i++ {
 			// $t = x_0 | x_1 << 8 | x_2 << 16$
-			t = byteopsLoad24(uniformBytes[3*i:])
+			t = ByteopsLoad24(uniformBytes[3*i:])
 			// $d = t \mod 2^6 + (t \gg 1 \mod 2^6) + (t \gg 2 \mod 2^6)$
 			d = t & 0x00249249
 			d = d + ((t >> 1) & 0x00249249)
@@ -81,7 +82,7 @@ func byteopsCbd(uniformBytes []byte, kVariant int) poly {
 	default:
 		for i := 0; i < paramsN/8; i++ {
 			// $t = x_0 | x_1 << 8 | x_2 << 16 | x_3 << 24$
-			t = byteopsLoad32(uniformBytes[4*i:])
+			t = ByteopsLoad32(uniformBytes[4*i:])
 			// $d = t \mod 2^4 + (t \gg 1 \mod 2^4)$
 			d = t & 0x55555555
 			d = d + ((t >> 1) & 0x55555555)
@@ -98,7 +99,7 @@ func byteopsCbd(uniformBytes []byte, kVariant int) poly {
 	return resultPoly
 }
 
-// byteopsMontgomeryReduce reduces a 32-bit integer 'a' using Montgomery reduction.
+// ByteopsMontgomeryReduce reduces a 32-bit integer 'a' using Montgomery reduction.
 // This function performs the reduction by multiplying 'a' with a constant 'paramsQInv',
 // then subtracting the product from 'a' after converting it to a 32-bit integer.
 // The result is then right-shifted by 16 bits and returned as a 16-bit integer.
@@ -110,7 +111,7 @@ func byteopsCbd(uniformBytes []byte, kVariant int) poly {
 // Example:
 // If 'a' is 1 and 'paramsQInv' is -12287, the function will correctly compute
 // the reduced value without sign extension issues.
-func byteopsMontgomeryReduce(a int32) int16 {
+func ByteopsMontgomeryReduce(a int32) int16 {
 	// The original expression is:
 	// `u := int16(a * paramsQInv)`
 	// `t := a - int32(u) * int32(paramsQ)`
@@ -130,10 +131,10 @@ func byteopsMontgomeryReduce(a int32) int16 {
 	return int16((a - int32(int16(a*int32(paramsQInv)))*int32(paramsQ)) >> 16)
 }
 
-// byteopsBarrettReduce computes a Barrett reduction; given
+// ByteopsBarrettReduce computes a Barrett reduction; given
 // a 16-bit integer `a`, returns a 16-bit integer congruent to
 // `a mod Q` in {0,...,Q}.
-func byteopsBarrettReduce(a int16) int16 {
+func ByteopsBarrettReduce(a int16) int16 {
 	var t int16
 	// `v` is a constant value pre-computed in `params.go`.
 	var v int16 = int16(((uint32(1) << 26) + uint32(paramsQ/2)) / uint32(paramsQ))
@@ -145,8 +146,8 @@ func byteopsBarrettReduce(a int16) int16 {
 	return a - t
 }
 
-// byteopsCSubQ conditionally subtracts Q from a.
-func byteopsCSubQ(a int16) int16 {
+// ByteopsCSubQ conditionally subtracts Q from a.
+func ByteopsCSubQ(a int16) int16 {
 	// $a = a - Q$
 	a = a - int16(paramsQ)
 	// $a = a + ((a >> 15) & Q)$
