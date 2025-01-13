@@ -1,9 +1,6 @@
 package gokyber
 
-// Pre-computed twiddle factors for NTT.
-// $\omega_n$ is the n-th primitive root of unity in $\mathbb{Z}_q$.
-// `nttTwiddleFactors` contains the twiddle factors $\omega_{128}^i$ for $i \in [0, 127]$.
-var nttTwiddleFactors [128]int16 = [128]int16{
+var nttZetas [128]int16 = [128]int16{
 	2285, 2571, 2970, 1812, 1493, 1422, 287, 202, 3158, 622, 1577, 182, 962,
 	2127, 1855, 1468, 573, 2004, 264, 383, 2500, 1458, 1727, 3199, 2648, 1017,
 	732, 608, 1787, 411, 3124, 1758, 1223, 652, 2777, 1015, 2036, 1491, 3047,
@@ -16,9 +13,7 @@ var nttTwiddleFactors [128]int16 = [128]int16{
 	478, 3221, 3021, 996, 991, 958, 1869, 1522, 1628,
 }
 
-// Pre-computed inverse twiddle factors for INTT.
-// `nttInvTwiddleFactors` contains the twiddle factors $\omega_{128}^{-i}$ for $i \in [0, 127]$.
-var nttInvTwiddleFactors [128]int16 = [128]int16{
+var nttZetasInv [128]int16 = [128]int16{
 	1701, 1807, 1460, 2371, 2338, 2333, 308, 108, 2851, 870, 854, 1510, 2535,
 	1278, 1530, 1185, 1659, 1187, 3109, 874, 1335, 2111, 136, 1215, 2945, 1465,
 	1285, 2007, 2719, 2726, 2232, 2512, 75, 156, 3000, 2911, 2980, 872, 2685,
@@ -31,68 +26,96 @@ var nttInvTwiddleFactors [128]int16 = [128]int16{
 	3127, 3042, 1907, 1836, 1517, 359, 758, 1441,
 }
 
-// montgomeryMul performs multiplication followed by Montgomery reduction.
-// Returns a 16-bit integer congruent to $a \cdot b \cdot R^{-1} \pmod{Q}$.
-func montgomeryMul(a int16, b int16) int16 {
-	return MontgomeryReduce(int32(a) * int32(b))
+// nttFqMul performs multiplication followed by Montgomery reduction
+// and returns a 16-bit integer congruent to `a*b*R^{-1} mod Q`.
+func nttFqMul(a int16, b int16) int16 {
+	return byteopsMontgomeryReduce(int32(a) * int32(b))
 }
 
-// ForwardNTT computes the in-place forward Number Theoretic Transform (NTT).
-// Input is in standard order, output is in bit-reversed order.
-func ForwardNTT(inputPoly Polynomial) Polynomial {
-	layerCounter := 0
-	layerWidth := 128
-	for layerWidth >= 2 {
-		for startIndex := 0; startIndex < 256; startIndex = layerCounter + layerWidth {
-			twiddleFactor := nttTwiddleFactors[layerCounter]
-			layerCounter = layerCounter + 1
-			for j := startIndex; j < startIndex+layerWidth; j++ {
-				// $t = \omega \cdot r[j + l]$
-				temp := montgomeryMul(twiddleFactor, inputPoly[j+layerWidth])
-				// $r[j + l] = r[j] - t$
-				inputPoly[j+layerWidth] = inputPoly[j] - temp
-				// $r[j] = r[j] + t$
-				inputPoly[j] = inputPoly[j] + temp
+// ntt performs the Number Theoretic Transform (NTT) on a polynomial.
+//
+// The NTT is a specialized version of the Fast Fourier Transform (FFT)
+// that operates in a finite field, making it suitable for cryptographic
+// applications. This function transforms the input polynomial `r` into
+// its NTT representation.
+//
+// The function iterates through different stages of the transformation,
+// progressively combining elements of the polynomial using modular
+// arithmetic and precomputed roots of unity (stored in `nttZetas`).
+//
+// Modes:
+//   - Forward NTT: Converts the polynomial from its coefficient form to
+//     its NTT form.
+//   - Inverse NTT: Converts the polynomial from its NTT form back to its
+//     coefficient form (not implemented in this function).
+//
+// Parameters:
+// - r: The input polynomial to be transformed.
+//
+// Returns:
+// - The transformed polynomial in its NTT representation.
+func ntt(r poly) poly {
+	j := 0
+	k := 1
+	for l := 128; l >= 2; l >>= 1 {
+		for start := 0; start < 256; start = j + l {
+			zeta := nttZetas[k]
+			k = k + 1
+			for j = start; j < start+l; j++ {
+				t := nttFqMul(zeta, r[j+l])
+				r[j+l] = r[j] - t
+				r[j] = r[j] + t
 			}
 		}
-		layerWidth >>= 1 // Divide layerWidth by 2
 	}
-	return inputPoly
+	return r
 }
 
-// InverseNTT computes the in-place inverse Number Theoretic Transform (INTT).
-// Input is in bit-reversed order, output is in standard order.
-func InverseNTT(inputPoly Polynomial) Polynomial {
-	layerCounter := 0
-	layerWidth := 2
-	for layerWidth <= 128 {
-		for startIndex := 0; startIndex < 256; startIndex = layerCounter + layerWidth {
-			twiddleFactor := nttInvTwiddleFactors[layerCounter]
-			layerCounter = layerCounter + 1
-			for j := startIndex; j < startIndex+layerWidth; j++ {
-				// $t = r[j]$
-				temp := inputPoly[j]
-				// $r[j] = t + r[j + l]$
-				inputPoly[j] = BarrettReduce(temp + inputPoly[j+layerWidth])
-				// $r[j + l] = \omega^{-1} \cdot (t - r[j + l])$
-				inputPoly[j+layerWidth] = montgomeryMul(twiddleFactor, temp-inputPoly[j+layerWidth])
+// nttInv performs the inverse Number Theoretic Transform (NTT) on a polynomial.
+// This function is used to convert data from the frequency domain back to the time domain.
+// The input is in bit-reversed order, the output is in standard order.
+//
+// The function operates in two main modes:
+//  1. Iterative Mode: It iterates over the polynomial in stages, reducing the size of the problem
+//     by half in each stage until the entire polynomial is transformed.
+//  2. Final Multiplication Mode: After the iterative stages, each element of the polynomial is
+//     multiplied by a specific constant to complete the inverse transformation.
+//
+// Parameters:
+// - r: The input polynomial to be transformed.
+//
+// Returns:
+// - The transformed polynomial in the time domain.
+func nttInv(r poly) poly {
+	j := 0
+	k := 0
+	for l := 2; l <= 128; l <<= 1 {
+		for start := 0; start < 256; start = j + l {
+			zeta := nttZetasInv[k]
+			k = k + 1
+			for j = start; j < start+l; j++ {
+				t := r[j]
+				r[j] = byteopsBarrettReduce(t + r[j+l])
+				r[j+l] = t - r[j+l]
+				r[j+l] = nttFqMul(zeta, r[j+l])
 			}
 		}
-		layerWidth <<= 1 // Multiply layerWidth by 2
 	}
 	for j := 0; j < 256; j++ {
-		// $r[j] = r[j] \cdot \omega_{128}^{-128} \cdot R^{-1} = r[j] \cdot (2^{-7}) \pmod{q}$
-		inputPoly[j] = montgomeryMul(inputPoly[j], nttInvTwiddleFactors[127])
+		r[j] = nttFqMul(r[j], nttZetasInv[127])
 	}
-	return inputPoly
+	return r
 }
 
-// BaseMul multiplies two polynomials in the NTT domain.
-// This is multiplication in $Z_q[X]/(X^2 - \zeta)$.
-func BaseMul(a0 int16, a1 int16, b0 int16, b1 int16, zeta int16) (int16, int16) {
-	// $r_0 = a_1 \cdot b_1 \cdot \zeta + a_0 \cdot b_0$
-	r0 := montgomeryMul(montgomeryMul(a1, b1), zeta) + montgomeryMul(a0, b0)
-	// $r_1 = a_0 \cdot b_1 + a_1 \cdot b_0$
-	r1 := montgomeryMul(a0, b1) + montgomeryMul(a1, b0)
-	return r0, r1
+// nttBaseMul performs a base multiplication operation used in the Number Theoretic Transform (NTT).
+// It takes two pairs of int16 values (a0, a1) and (b0, b1), and a zeta value.
+// The function returns a pair of int16 values resulting from the NTT base multiplication.
+// The operation involves modular arithmetic and multiplication of the inputs with the zeta value.
+func nttBaseMul(
+	a0 int16, a1 int16,
+	b0 int16, b1 int16,
+	zeta int16,
+) (int16, int16) {
+	return nttFqMul(nttFqMul(a1, b1), zeta) + nttFqMul(a0, b0),
+		nttFqMul(a0, b1) + nttFqMul(a1, b0)
 }

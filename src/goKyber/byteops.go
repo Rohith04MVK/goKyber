@@ -1,7 +1,13 @@
 package gokyber
 
-// LoadLittleEndian32 loads a 32-bit unsigned integer from a byte slice in little-endian order.
-func LoadLittleEndian32(inputBytes []byte) uint32 {
+// byteopsLoad32 converts a slice of 4 bytes into a single uint32 value.
+// It takes the first 4 bytes from the input slice and combines them into a uint32.
+// The bytes are combined in little-endian order, meaning the first byte is the least significant byte.
+//
+// Example:
+// inputBytes := []byte{0x01, 0x02, 0x03, 0x04}
+// result := byteopsLoad32(inputBytes) // result will be 0x04030201
+func byteopsLoad32(inputBytes []byte) uint32 {
 	var result uint32
 	result = uint32(inputBytes[0])
 	result = result | (uint32(inputBytes[1]) << 8)
@@ -10,8 +16,23 @@ func LoadLittleEndian32(inputBytes []byte) uint32 {
 	return result
 }
 
-// LoadLittleEndian24 loads a 24-bit unsigned integer from a byte slice in little-endian order.
-func LoadLittleEndian24(inputBytes []byte) uint32 {
+// byteopsLoad24 loads 3 bytes from the inputBytes slice and combines them into a single uint32 value.
+// It takes the first byte as the least significant byte, the second byte shifted left by 8 bits,
+// and the third byte shifted left by 16 bits, then combines them using bitwise OR operations.
+//
+// Example:
+//
+//	inputBytes := []byte{0x01, 0x02, 0x03}
+//	result := byteopsLoad24(inputBytes) // result will be 0x00030201
+//
+// Parameters:
+//
+//	inputBytes - a slice of bytes from which the first 3 bytes will be read and combined.
+//
+// Returns:
+//
+//	A uint32 value representing the combined result of the first 3 bytes.
+func byteopsLoad24(inputBytes []byte) uint32 {
 	var result uint32
 	result = uint32(inputBytes[0])
 	result = result | (uint32(inputBytes[1]) << 8)
@@ -19,18 +40,31 @@ func LoadLittleEndian24(inputBytes []byte) uint32 {
 	return result
 }
 
-// CenteredBinomialFromUniform computes a polynomial with coefficients distributed
-// according to a centered binomial distribution with parameter $\eta$,
-// given an array of uniformly random bytes.
-func CenteredBinomialFromUniform(uniformBytes []byte, kVariant int) Polynomial {
+// byteopsCbd processes a byte array and generates a polynomial based on the kVariant parameter.
+// The function supports two modes determined by kVariant: 2 and other values.
+//
+// For kVariant = 2:
+// - Processes the input bytes in chunks of 3.
+// - Loads 24 bits from the input bytes and performs bitwise operations to compute intermediate values.
+// - Extracts two 3-bit values (a and b) from the intermediate value and computes their difference.
+// - Stores the result in the polynomial.
+//
+// For other kVariant values:
+// - Processes the input bytes in chunks of 4.
+// - Loads 32 bits from the input bytes and performs bitwise operations to compute intermediate values.
+// - Extracts two 2-bit values (a and b) from the intermediate value and computes their difference.
+// - Stores the result in the polynomial.
+//
+// The function uses bitwise operations and shifts to manipulate the input bytes and compute the polynomial coefficients.
+func byteopsCbd(uniformBytes []byte, kVariant int) poly {
 	var t, d uint32
 	var a, b int16
-	var resultPoly Polynomial
+	var resultPoly poly
 	switch kVariant {
 	case 2:
 		for i := 0; i < paramsN/4; i++ {
 			// $t = x_0 | x_1 << 8 | x_2 << 16$
-			t = LoadLittleEndian24(uniformBytes[3*i:])
+			t = byteopsLoad24(uniformBytes[3*i:])
 			// $d = t \mod 2^6 + (t \gg 1 \mod 2^6) + (t \gg 2 \mod 2^6)$
 			d = t & 0x00249249
 			d = d + ((t >> 1) & 0x00249249)
@@ -47,7 +81,7 @@ func CenteredBinomialFromUniform(uniformBytes []byte, kVariant int) Polynomial {
 	default:
 		for i := 0; i < paramsN/8; i++ {
 			// $t = x_0 | x_1 << 8 | x_2 << 16 | x_3 << 24$
-			t = LoadLittleEndian32(uniformBytes[4*i:])
+			t = byteopsLoad32(uniformBytes[4*i:])
 			// $d = t \mod 2^4 + (t \gg 1 \mod 2^4)$
 			d = t & 0x55555555
 			d = d + ((t >> 1) & 0x55555555)
@@ -64,9 +98,19 @@ func CenteredBinomialFromUniform(uniformBytes []byte, kVariant int) Polynomial {
 	return resultPoly
 }
 
-// MontgomeryReduce computes a Montgomery reduction; given a 32-bit integer `a`,
-// returns `a * R^-1 mod Q` where `R=2^16`.
-func MontgomeryReduce(a int32) int16 {
+// byteopsMontgomeryReduce reduces a 32-bit integer 'a' using Montgomery reduction.
+// This function performs the reduction by multiplying 'a' with a constant 'paramsQInv',
+// then subtracting the product from 'a' after converting it to a 32-bit integer.
+// The result is then right-shifted by 16 bits and returned as a 16-bit integer.
+//
+// The function avoids direct conversion of the product to int16 due to potential
+// issues with sign extension in Go. Instead, it ensures the correct reduction
+// by handling the intermediate values properly.
+//
+// Example:
+// If 'a' is 1 and 'paramsQInv' is -12287, the function will correctly compute
+// the reduced value without sign extension issues.
+func byteopsMontgomeryReduce(a int32) int16 {
 	// The original expression is:
 	// `u := int16(a * paramsQInv)`
 	// `t := a - int32(u) * int32(paramsQ)`
@@ -86,9 +130,10 @@ func MontgomeryReduce(a int32) int16 {
 	return int16((a - int32(int16(a*int32(paramsQInv)))*int32(paramsQ)) >> 16)
 }
 
-// BarrettReduce computes a Barrett reduction; given a 16-bit integer `a`,
-// returns a 16-bit integer congruent to `a mod Q` in {0,...,Q}.
-func BarrettReduce(a int16) int16 {
+// byteopsBarrettReduce computes a Barrett reduction; given
+// a 16-bit integer `a`, returns a 16-bit integer congruent to
+// `a mod Q` in {0,...,Q}.
+func byteopsBarrettReduce(a int16) int16 {
 	var t int16
 	// `v` is a constant value pre-computed in `params.go`.
 	var v int16 = int16(((uint32(1) << 26) + uint32(paramsQ/2)) / uint32(paramsQ))
@@ -100,9 +145,8 @@ func BarrettReduce(a int16) int16 {
 	return a - t
 }
 
-// ConditionalSubQ conditionally subtracts Q from a.
-// Returns r such that r = a - Q if a >= Q, and r = a otherwise.
-func ConditionalSubQ(a int16) int16 {
+// byteopsCSubQ conditionally subtracts Q from a.
+func byteopsCSubQ(a int16) int16 {
 	// $a = a - Q$
 	a = a - int16(paramsQ)
 	// $a = a + ((a >> 15) & Q)$
