@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>goKyber</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Maple Mono';
+        background-color: #09000a;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        backdrop-filter: blur(5px);
+        background-image: url("./assests/backdrop.svg");
+      }
+
+      a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      header {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center; /* Align items vertically */
+      }
+
+      nav li {
+        margin-left: 20px;
+      }
+
+      main {
+        padding: 40px;
+        text-align: center;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 4em;
+        margin-bottom: 10px;
+      }
+
+      p {
+        font-size: 1em;
+        color: #ccc;
+        margin-bottom: 30px;
+      }
+
+      .example-button {
+        background-color: #d900ff;
+        color: #fff;
+        font-size: 1em;
+        font-weight: bold;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .features {
+        display: flex;
+        justify-content: space-around;
+        width: 80%;
+        margin-top: 50px;
+      }
+
+      .feature {
+        flex: 1;
+        padding: 20px;
+      }
+
+      .feature h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+      }
+
+      .feature p {
+        color: #aaa;
+      }
+
+      .code {
+        background-color: #130514;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-family: monospace;
+        color: #eee;
+      }
+
+      footer {
+        background-color: #09000a;
+        color: #aaa;
+        text-align: center;
+        border-top: 1px solid #130514;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      }
+
+      footer div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <a style="font-size: 1.2em;" href="#"><strong>goKyber</strong></a>
+      </div>
+      <div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="margin-right: 15px"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="margin-right: 15px"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <path
+            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+          ></path>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+          ></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+      </div>
+    </header>
+    <main>
+      <h1>goKyber</h1>
+      <p>A High-Performance and Practical Post-Quantum Encryption Framework</p>
+      <button class="example-button">Get Started</button>
+
+      <div class="features">
+        <div class="feature">
+          <h2>High-Performance Post-Quantum Encryption</h2>
+          <p>
+            goKyber delivers cutting-edge post-quantum encryption using the CRYSTALS-Kyber key-encapsulation mechanism (KEM), optimized for speed and practicality.
+          </p>
+        </div>
+        <div class="feature">
+          <h2>Simplicity Meets Practicality</h2>
+          <p>
+            Designed with clarity and usability in mind, goKyber lowers the barriers to adopting lattice-based encryption, making advanced security accessible to developers and educators alike.
+          </p>
+        </div>
+        <div class="feature">
+          <h2>Learn and Innovate</h2>
+          <p>
+            Whether you're building secure systems or teaching cryptographic principles, goKyber provides an instructive and powerful platform for exploring the potential of post-quantum security.
+          </p>
+        </div>
+      </div>
+
+      <div class="features" style="margin-top: 30px">
+        <div class="feature" style="flex-basis: 100%; text-align: center">
+          <h2>Read the docs</h2>
+          <p>Learn more in the <a href="#" style="color: #d900ff">Docs</a>.</p>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div>
+        <p>Made with <a href="#" style="color: #d900ff">💜</a> by goKyber Team</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
