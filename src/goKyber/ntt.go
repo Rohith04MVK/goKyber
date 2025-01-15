@@ -54,7 +54,7 @@ func NttFqMul(a int16, b int16) int16 {
 //
 // Returns:
 // - The transformed polynomial in its NTT representation.
-func Ntt(r poly) poly {
+func Ntt(r Polynomial) Polynomial {
 	j := 0
 	k := 1
 	for l := 128; l >= 2; l >>= 1 {
@@ -86,7 +86,7 @@ func Ntt(r poly) poly {
 //
 // Returns:
 // - The transformed polynomial in the time domain.
-func NttInv(r poly) poly {
+func NttInv(r Polynomial) Polynomial {
 	j := 0
 	k := 0
 	for l := 2; l <= 128; l <<= 1 {

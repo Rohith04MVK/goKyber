@@ -9,13 +9,13 @@ import (
 // IndcpaPackPublicKey serializes the public key as a concatenation of the
 // serialized vector of polynomials of the public key, and the public seed
 // used to generate the matrix `A`.
-func IndcpaPackPublicKey(publicKeyVector polyvec, seed []byte, kVariant int) []byte {
+func IndcpaPackPublicKey(publicKeyVector PolynomialVector, seed []byte, kVariant int) []byte {
 	return append(PolyvecToBytes(publicKeyVector, kVariant), seed...)
 }
 
 // IndcpaUnpackPublicKey de-serializes the public key from a byte array
 // and represents the approximate inverse of IndcpaPackPublicKey.
-func IndcpaUnpackPublicKey(inputBytes []byte, kVariant int) (polyvec, []byte) {
+func IndcpaUnpackPublicKey(inputBytes []byte, kVariant int) (PolynomialVector, []byte) {
 	switch kVariant {
 	case 2:
 		publicKeyVector := PolyvecFromBytes(inputBytes[:paramsPolyvecBytesK512], kVariant)
@@ -33,27 +33,27 @@ func IndcpaUnpackPublicKey(inputBytes []byte, kVariant int) (polyvec, []byte) {
 }
 
 // IndcpaPackPrivateKey serializes the private key.
-func IndcpaPackPrivateKey(privateKeyVector polyvec, kVariant int) []byte {
+func IndcpaPackPrivateKey(privateKeyVector PolynomialVector, kVariant int) []byte {
 	return PolyvecToBytes(privateKeyVector, kVariant)
 }
 
 // IndcpaUnpackPrivateKey de-serializes the private key and represents
 // the inverse of IndcpaPackPrivateKey.
-func IndcpaUnpackPrivateKey(inputBytes []byte, kVariant int) polyvec {
+func IndcpaUnpackPrivateKey(inputBytes []byte, kVariant int) PolynomialVector {
 	return PolyvecFromBytes(inputBytes, kVariant)
 }
 
 // IndcpaPackCiphertext serializes the ciphertext as a concatenation of
 // the compressed and serialized vector of polynomials `b` and the
 // compressed and serialized polynomial `v`.
-func IndcpaPackCiphertext(bVector polyvec, v poly, kVariant int) []byte {
+func IndcpaPackCiphertext(bVector PolynomialVector, v Polynomial, kVariant int) []byte {
 	return append(PolyvecCompress(bVector, kVariant), PolyCompress(v, kVariant)...)
 }
 
 // IndcpaUnpackCiphertext de-serializes and decompresses the ciphertext
 // from a byte array, and represents the approximate inverse of
 // IndcpaPackCiphertext.
-func IndcpaUnpackCiphertext(inputBytes []byte, kVariant int) (polyvec, poly) {
+func IndcpaUnpackCiphertext(inputBytes []byte, kVariant int) (PolynomialVector, Polynomial) {
 	switch kVariant {
 	case 2:
 		bVector := PolyvecDecompress(inputBytes[:paramsPolyvecCompressedBytesK512], kVariant)
@@ -72,8 +72,8 @@ func IndcpaUnpackCiphertext(inputBytes []byte, kVariant int) (polyvec, poly) {
 
 // IndcpaRejUniform runs rejection sampling on uniform random bytes
 // to generate uniform random integers modulo `Q`.
-func IndcpaRejUniform(inputBytes []byte, inputLength int, numCoefficients int) (poly, int) {
-	var resultPoly poly
+func IndcpaRejUniform(inputBytes []byte, inputLength int, numCoefficients int) (Polynomial, int) {
+	var resultPoly Polynomial
 	var d1, d2 uint16
 	i := 0
 	j := 0
@@ -100,8 +100,8 @@ func IndcpaRejUniform(inputBytes []byte, inputLength int, numCoefficients int) (
 // IndcpaGenMatrix deterministically generates a matrix `A` (or the transpose of `A`)
 // from a seed. Entries of the matrix are polynomials that look uniformly random.
 // Performs rejection sampling on the output of an extendable-output function (XOF).
-func IndcpaGenMatrix(seed []byte, transposed bool, kVariant int) ([]polyvec, error) {
-	resultMatrix := make([]polyvec, kVariant)
+func IndcpaGenMatrix(seed []byte, transposed bool, kVariant int) ([]PolynomialVector, error) {
+	resultMatrix := make([]PolynomialVector, kVariant)
 	buffer := make([]byte, 672)
 	xof := sha3.NewShake128()
 	ctr := 0
@@ -118,17 +118,17 @@ func IndcpaGenMatrix(seed []byte, transposed bool, kVariant int) ([]polyvec, err
 				_, err = xof.Write(append(seed, byte(j), byte(i)))
 			}
 			if err != nil {
-				return []polyvec{}, err
+				return []PolynomialVector{}, err
 			}
 			_, err = xof.Read(buffer)
 			if err != nil {
-				return []polyvec{}, err
+				return []PolynomialVector{}, err
 			}
 			// Sample 504 coefficients into resultMatrix[i][j].
 			resultMatrix[i][j], ctr = IndcpaRejUniform(buffer[:504], 504, paramsN)
 			// Sample remaining coefficients using the last 168 bytes of the buffer.
 			for ctr < paramsN {
-				var missingCoefficients poly
+				var missingCoefficients Polynomial
 				var numSampled int
 				missingCoefficients, numSampled = IndcpaRejUniform(buffer[504:672], 168, paramsN-ctr)
 				for k := ctr; k < paramsN; k++ {

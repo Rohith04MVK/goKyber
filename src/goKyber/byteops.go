@@ -57,10 +57,10 @@ func ByteopsLoad24(inputBytes []byte) uint32 {
 // - Stores the result in the polynomial.
 //
 // The function uses bitwise operations and shifts to manipulate the input bytes and compute the polynomial coefficients.
-func ByteopsCbd(uniformBytes []byte, kVariant int) poly {
+func ByteopsCbd(uniformBytes []byte, kVariant int) Polynomial {
 	var t, d uint32
 	var a, b int16
-	var resultPoly poly
+	var resultPoly Polynomial
 	switch kVariant {
 	case 2:
 		for i := 0; i < paramsN/4; i++ {

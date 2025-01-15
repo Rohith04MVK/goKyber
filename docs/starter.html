@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>goKyber - Documentation</title>
+    <link rel="stylesheet" href="./assests/prism.css" />
+    <!-- Replace with the correct path to your Prism CSS -->
+    <style>
+      @font-face {
+        font-family: "Maple Mono";
+        font-style: normal;
+        font-display: swap;
+        font-weight: 400;
+        src: url(https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@latest/latin-400-normal.woff2)
+            format("woff2"),
+          url(https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@latest/latin-400-normal.woff)
+            format("woff");
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Maple Mono", monospace; /* Ensure monospace fallback */
+        background-color: #09000a;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        backdrop-filter: blur(5px);
+        background-image: url("./assests/backdrop.svg");
+      }
+
+      a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      header {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      nav li {
+        margin-left: 20px;
+      }
+
+      main {
+        padding: 40px;
+        display: flex;
+        flex-grow: 1;
+        max-width: 1200px; /* Limit width for readability */
+        margin: 0 auto; /* Center the content */
+      }
+
+      .sidebar {
+        width: 250px;
+        padding-right: 30px;
+        border-right: 1px solid #130514;
+      }
+
+      .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sidebar li {
+        margin-bottom: 10px;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 8px 0;
+        border-left: 3px solid transparent;
+        transition: border-left-color 0.2s ease-in-out;
+      }
+
+      .sidebar a:hover,
+      .sidebar a.active {
+        border-left-color: #d900ff;
+      }
+
+      .content {
+        flex-grow: 1;
+        padding-left: 30px;
+      }
+
+      h1 {
+        font-size: 3em; /* Slightly smaller for docs */
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 2em;
+        margin-top: 40px;
+        margin-bottom: 15px;
+      }
+
+      h3 {
+        font-size: 1.5em;
+        margin-top: 30px;
+        margin-bottom: 10px;
+      }
+
+      p {
+        font-size: 1em;
+        color: #ccc;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .example-button {
+        background-color: #d900ff;
+        color: #fff;
+        font-size: 1em;
+        font-weight: bold;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        display: inline-block; /* To allow margin */
+      }
+
+      .code-block {
+        background-color: #130514;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto; /* For long code lines */
+        margin-bottom: 20px;
+      }
+
+      .code {
+        font-family: monospace;
+        color: #eee;
+        display: block; /* Ensure proper wrapping */
+        white-space: pre; /* Preserve whitespace */
+      }
+
+      footer {
+        background-color: #09000a;
+        color: #aaa;
+        text-align: center;
+        border-top: 1px solid #130514;
+        padding: 20px 0; /* Add padding for better spacing */
+      }
+
+      footer div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <a style="font-size: 1.2em" href="#"><strong>goKyber</strong></a>
+      </div>
+      <div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="margin-right: 15px"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="margin-right: 15px"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <path
+            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+          ></path>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+          ></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+      </div>
+    </header>
+    <main>
+      <aside class="sidebar">
+        <ul>
+          <li><a href="starter" class="active">Introduction</a></li>
+          <li><a href="#">Getting Started</a></li>
+          <li><a href="#">Installation</a></li>
+          <li><a href="#">Usage Examples</a></li>
+          <li><a href="#api">API Reference</a></li>
+          <li><a href="#">Key Concepts</a></li>
+          <li><a href="#">Advanced Topics</a></li>
+          <li><a href="#">Contributing</a></li>
+        </ul>
+      </aside>
+      <div class="content">
+        <h1>Introduction to goKyber</h1>
+        <p>
+          Welcome to the official documentation for goKyber, a high-performance
+          and practical post-quantum encryption framework built with the
+          CRYSTALS-Kyber key-encapsulation mechanism (KEM). This documentation
+          will guide you through the features, installation process, usage
+          examples, and underlying concepts of goKyber.
+        </p>
+
+        <h2 id="starter">Getting Started</h2>
+        <p>
+          Ready to dive in? This section covers the initial steps to get goKyber
+          up and running on your system.
+        </p>
+
+        <h3>Prerequisites</h3>
+        <p>Before you begin, ensure you have the following installed:</p>
+        <ul>
+          <li>Go (version X.X or higher)</li>
+          <li>[Optional] Any specific build tools</li>
+        </ul>
+
+        <h3>Installation</h3>
+        <p>Install goKyber using the following Go command:</p>
+        <div class="code-block">
+          <pre><code class="language-go">
+            go get github.com/Rohith04MVK/goKyber
+          </code></pre>
+        </div>
+
+        <h2>Usage Examples</h2>
+        <p>
+          Explore practical examples of how to use goKyber for encryption and
+          decryption tasks.
+        </p>
+
+        <h3>Basic Encryption</h3>
+        <p>Here's a simple example of encrypting a message:</p>
+        <div class="code-block">
+          <pre><code class="language-go">
+            package main
+
+            import (
+              "crypto/subtle"
+              "fmt"
+            
+              gokyber "github.com/Rohith04MVK/goKyber/goKyber"
+            )
+            
+            func main() {
+              // Kyber-768 Example: Simulating Communication Between Two Parties (Alice and Bob)
+            
+              fmt.Println("Kyber-768 Key Exchange Between Alice and Bob")
+              fmt.Println("---------------------------------------------")
+            
+              // --- Alice's Side ---
+              fmt.Println("\nAlice:")
+            
+              // Alice generates a Kyber-768 key pair
+              alicePrivateKey, alicePublicKey, err := gokyber.KemKeypair(768)
+              if err != nil {
+                fmt.Println("  Error: Alice failed to generate key pair:", err)
+                return
+              }
+              fmt.Println("  1. Generates a key pair.")
+            
+              // Alice sends her public key to Bob (in a real scenario, this would be over a network)
+              fmt.Println("  2. Sends her public key to Bob.")
+            
+              // --- Bob's Side ---
+              fmt.Println("\nBob:")
+            
+              // Bob receives Alice's public key
+              fmt.Println("  1. Receives Alice's public key.")
+            
+              // Bob encrypts a message (using Alice's public key) to generate a ciphertext and a shared secret
+              ciphertext, sharedSecretBob, err := gokyber.KemEncrypt(alicePublicKey, 768)
+              if err != nil {
+                fmt.Println("  Error: Bob failed to encrypt:", err)
+                return
+              }
+              fmt.Println("  2. Encrypts a message using Alice's public key, generating a ciphertext and a shared secret.")
+            
+              // Bob sends the ciphertext to Alice
+              fmt.Println("  3. Sends the ciphertext to Alice.")
+              fmt.Printf("     Ciphertext (truncated): %x...\n", ciphertext[:25]) // Show a truncated ciphertext
+            
+              // --- Alice's Side ---
+              fmt.Println("\nAlice:")
+            
+              // Alice receives the ciphertext from Bob
+              fmt.Println("  3. Receives the ciphertext from Bob.")
+            
+              // Alice decrypts the ciphertext using her private key to get the shared secret
+              sharedSecretAlice, err := gokyber.KemDecrypt(ciphertext, alicePrivateKey, 768)
+              if err != nil {
+                fmt.Println("  Error: Alice failed to decrypt:", err)
+                return
+              }
+              fmt.Println("  4. Decrypts the ciphertext using her private key to obtain the shared secret.")
+            
+              // --- Verification ---
+              fmt.Println("\nVerification:")
+            
+              fmt.Printf("  Alice's shared secret: %x\n", sharedSecretAlice)
+              fmt.Printf("  Bob's shared secret : %x\n", sharedSecretBob)
+            
+              if subtle.ConstantTimeCompare(sharedSecretAlice, sharedSecretBob) == 1 {
+                fmt.Println("  Shared secrets match! Secure communication established.")
+              } else {
+                fmt.Println("  Shared secrets do not match! Something went wrong.")
+              }
+            }
+          </code></pre>
+        </div>
+
+        <h2 id="api">API Reference</h2>
+        <p>
+          Detailed documentation of the goKyber API functions and structures.
+        </p>
+
+        <h3>`GenerateKeyPair()`</h3>
+        <p>Generates a new public and private key pair.</p>
+        <div class="code-block">
+          <pre><code class="language-go">
+            func GenerateKeyPair() (publicKey []byte, privateKey []byte, error)
+          </code></pre>
+        </div>
+
+        <p>
+          For more in-depth information on specific functions and concepts,
+          please refer to the corresponding sections in the sidebar.
+        </p>
+        <a href="#" class="example-button">Explore More</a>
+      </div>
+    </main>
+    <footer>
+      <div>
+        <p>
+          Made with <a href="#" style="color: #d900ff">💜</a> by goKyber Team
+        </p>
+      </div>
+    </footer>
+    <script src="./assests/prism.js"></script>
+    <!-- Replace with the correct path to your Prism JS -->
+  </body>
+</html>
