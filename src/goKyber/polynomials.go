@@ -9,7 +9,7 @@ type PolynomialVector []Polynomial
 //   - inputPoly: The polynomial to be compressed.
 //   - kVariant: Determines the compression mode. It can be either 2, 3, or any other value.
 //
-// Returns:
+// Returns: 
 //   - A byte slice containing the compressed polynomial.
 //
 // Compression Modes:
@@ -70,7 +70,7 @@ func PolyDecompress(inputBytes []byte, kVariant int) Polynomial {
 			inputByteIndex = inputByteIndex + 1
 		}
 	case 4:
-		for i := 0; i < paramsN/8; i++ {
+		for i := range paramsN / 8 {
 			temp[0] = (inputBytes[inputByteIndex+0] >> 0)
 			temp[1] = (inputBytes[inputByteIndex+0] >> 5) | (inputBytes[inputByteIndex+1] << 3)
 			temp[2] = (inputBytes[inputByteIndex+1] >> 2)
