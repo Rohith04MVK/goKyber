@@ -9,7 +9,7 @@ type PolynomialVector []Polynomial
 //   - inputPoly: The polynomial to be compressed.
 //   - kVariant: Determines the compression mode. It can be either 2, 3, or any other value.
 //
-// Returns: 
+// Returns:
 //   - A byte slice containing the compressed polynomial.
 //
 // Compression Modes:
@@ -518,14 +518,14 @@ func PolyvecReduce(polyVec PolynomialVector, kVariant int) {
 // PolyvecCSubQ applies the conditional subtraction of `Q` to each coefficient
 // of each element of a vector of polynomials.
 func PolyvecCSubQ(polyVec PolynomialVector, kVariant int) {
-	for i := 0; i < kVariant; i++ {
+	for i := range kVariant {
 		polyVec[i] = PolyCSubQ(polyVec[i])
 	}
 }
 
 // PolyvecAdd adds two vectors of polynomials.
 func PolyvecAdd(aVec PolynomialVector, bVec PolynomialVector, kVariant int) {
-	for i := 0; i < kVariant; i++ {
+	for i := range kVariant {
 		aVec[i] = PolyAdd(aVec[i], bVec[i])
 	}
 }
