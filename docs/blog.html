@@ -1,307 +1,458 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>goKyber - Mathematical Foundations</title>
-    <style>
-/* maple-mono-latin-400-normal */
-@font-face {
-  font-family: 'Maple Mono';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 400;
-  src: url(https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@latest/latin-400-normal.ttf) format('truetype');
-}
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Maple Mono';
-        background-color: #09000a;
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        backdrop-filter: blur(5px);
-        background-image: url("./assests/backdrop.svg");
-        font-size: 1.1em; /* Slightly larger base font for readability */
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>goKyber - Mathematical Foundations</title>
+  <style>
+    /* maple-mono-latin-400-normal */
+    @font-face {
+      font-family: 'Maple Mono';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 400;
+      src: url(https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@latest/latin-400-normal.ttf) format('truetype');
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Maple Mono';
+      background-color: #09000a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      backdrop-filter: blur(10px);
+      background-image: url("./assests/backdrop.svg");
+      font-size: 1.1em;
+      /* Slightly larger base font for readability */
+    }
+
+    a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    header {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      /* Align items vertically */
+    }
+
+    nav li {
+      margin-left: 20px;
+    }
+
+    main {
+      padding: 40px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      /* Align content to the start for blog style */
+      max-width: 900px;
+      /* Limit content width for better readability */
+      margin: 0 auto;
+      /* Center content on larger screens */
+    }
+
+    h1 {
+      font-size: 3em;
+      /* Slightly smaller main title for technical doc */
+      margin-bottom: 20px;
+      text-align: left;
+      /* Align title to the left */
+    }
+
+    h2 {
+      font-size: 2em;
+      margin-top: 40px;
+      /* More space above sections */
+      margin-bottom: 15px;
+    }
+
+    h3 {
+      font-size: 1.5em;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+
+    p,
+    li {
+      font-size: 1em;
+      color: #ccc;
+      line-height: 1.6;
+      /* Improved line height for readability */
+      margin-bottom: 15px;
+      text-align: justify;
+      /* Justify text for formal look */
+    }
+
+    ul,
+    ol {
+      color: #ccc;
+      margin-bottom: 15px;
+    }
+
+    .example-button {
+      background-color: #d900ee;
+      color: #fff;
+      font-size: 1em;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      /* Add some space above the button */
+    }
+
+    .code-block {
+      background-color: #130514;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: monospace;
+      color: #eee;
+      overflow-x: auto;
+      /* Enable horizontal scrolling for long code lines */
+      margin: 10px 0;
+    }
+
+    .code {
+      background-color: #130514;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+      color: #eee;
+    }
+
+    .equation {
+      display: block;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.3em;
+      /* Larger font for equations */
+    }
+
+    footer {
+      background-color: #09000a;
+      color: #aaa;
+      text-align: center;
+      border-top: 1px solid #130514;
+      padding: 20px 0;
+      /* Add padding to footer */
+      margin-top: 40px;
+      /* Add top margin to separate from main content */
+    }
+
+    footer div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+  </style>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
       }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+</head>
 
-      a {
-        color: #fff;
-        text-decoration: none;
-      }
+<body>
+  <header>
+    <div>
+      <a style="font-size: 1.2em;" href="../"><strong>goKyber</strong></a>
+      <span style="color: #aaa; margin-left: 10px;">Docs</span>
+    </div>
+    <div>
+      <!-- You can keep the icons or remove them for a docs page -->
+    </div>
+  </header>
+  <main>
+    <h1>Mathematical Foundations of goKyber</h1>
 
-      header {
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+    <p>
+      goKyber is built upon the foundations of post-quantum cryptography, specifically leveraging lattice-based
+      cryptography. This document delves into the mathematical concepts that underpin goKyber, providing a detailed
+      explanation suitable for those with a mathematical background. We will explore lattices, polynomials, the Learning
+      with Errors (LWE) problem, related hard problems, and the algorithmic optimizations that make goKyber efficient.
+    </p>
 
-      nav ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        align-items: center; /* Align items vertically */
-      }
+    <h2>Lattices</h2>
 
-      nav li {
-        margin-left: 20px;
-      }
+    <p>
+      In mathematics, a lattice is a regular array of points in n-dimensional Euclidean space. Formally, a lattice $L$
+      in $\mathbb{R}^n$ is a discrete additive subgroup of $\mathbb{R}^n$. More concretely, for some basis vectors
+      $\mathbf{b}_1, \mathbf{b}_2, ..., \mathbf{b}_m \in \mathbb{R}^n$ (where $m \leq n$), the lattice generated by
+      these basis vectors is the set of all integer linear combinations:
+    </p>
+    <p class="equation">
+      $L = \{ \sum_{i=1}^{m} x_i \mathbf{b}_i \mid x_i \in \mathbb{Z} \}$
+    </p>
+    <p>
+      When $m = n$, the lattice is called a full-rank lattice. In cryptography, we often work with full-rank lattices in
+      integer vector spaces. Lattices are fundamental because certain computational problems on lattices are believed to
+      be computationally hard, even for quantum computers. This hardness forms the basis for post-quantum cryptography.
+    </p>
+    <img src="https://www.mdpi.com/signals/signals-05-00012/article_deploy/html/images/signals-05-00012-g001-550.jpg"
+      alt="" style="align-self: center;">
+    <h2>Polynomials and Polynomial Rings</h2>
 
-      main {
-        padding: 40px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: start; /* Align content to the start for blog style */
-        max-width: 900px; /* Limit content width for better readability */
-        margin: 0 auto; /* Center content on larger screens */
-      }
+    <p>
+      Polynomials play a crucial role in lattice-based cryptography, particularly in schemes like Kyber. We typically
+      work with polynomials in a ring, such as the ring of polynomials with integer coefficients modulo some integer
+      $q$, denoted as $\mathbb{Z}_q[x]$. In Kyber, we specifically use polynomial rings of the form $R_q =
+      \mathbb{Z}_q[x] / (x^n + 1)$, where $n$ is a power of 2 and $(x^n + 1)$ is the ideal generated by $x^n + 1$. This
+      means we are considering polynomials modulo $q$ and also modulo $x^n + 1$.
+    </p>
+    <p>
+      The operation modulo $(x^n + 1)$ is polynomial reduction. When we perform multiplication in $R_q$, after
+      multiplying two polynomials, we reduce the result modulo $q$ for coefficients and modulo $(x^n + 1)$ for the
+      polynomial degree. Reduction modulo $(x^n + 1)$ can be efficiently implemented by replacing $x^n$ with $-1$,
+      $x^{n+1}$ with $-x$, and so on.
+    </p>
 
-      h1 {
-        font-size: 3em; /* Slightly smaller main title for technical doc */
-        margin-bottom: 20px;
-        text-align: left; /* Align title to the left */
-      }
+    <h2>Learning With Errors (LWE) Problem</h2>
 
-      h2 {
-        font-size: 2em;
-        margin-top: 40px; /* More space above sections */
-        margin-bottom: 15px;
-      }
+    <p>
+      The Learning with Errors (LWE) problem is a central problem in lattice-based cryptography. It is conjectured to be
+      computationally hard to solve, even with quantum computers. The LWE problem comes in two main forms: search LWE
+      and decision LWE. In cryptography, the decision LWE problem is often more relevant.
+    </p>
 
-      h3 {
-        font-size: 1.5em;
-        margin-top: 30px;
-        margin-bottom: 10px;
-      }
+    <h3>Decision LWE Problem</h3>
+    <p>
+      Given a matrix $\mathbf{A} \in \mathbb{Z}_q^{m \times n}$ and a vector $\mathbf{s} \in \mathbb{Z}_q^{n}$ chosen
+      uniformly at random. Let $\mathbf{e} \in \mathbb{Z}_q^{m}$ be a "small" error vector, typically with entries
+      chosen from a discrete Gaussian distribution. We are given samples of the form $(\mathbf{a}_i, b_i)$, where
+      $\mathbf{a}_i$ is the $i$-th row of $\mathbf{A}$ and
+    </p>
+    <p class="equation">
+      $b_i = \langle \mathbf{a}_i, \mathbf{s} \rangle + e_i \pmod{q}$
+    </p>
+    <p>
+      The decision LWE problem asks to distinguish between samples generated as described (from the LWE distribution)
+      and samples where $b_i$ are chosen uniformly at random from $\mathbb{Z}_q$. In other words, distinguish between
+      $(\mathbf{A}, \mathbf{A}\mathbf{s} + \mathbf{e})$ and $(\mathbf{A}, \mathbf{u})$, where $\mathbf{u}$ is uniformly
+      random in $\mathbb{Z}_q^m$.
+    </p>
 
-      p, li {
-        font-size: 1em;
-        color: #ccc;
-        line-height: 1.6; /* Improved line height for readability */
-        margin-bottom: 15px;
-        text-align: justify; /* Justify text for formal look */
-      }
+    <h3>Hardness of LWE</h3>
+    <p>
+      The hardness of LWE is based on the presumed difficulty of solving certain lattice problems in their worst-case
+      scenario, such as the Shortest Vector Problem (SVP) and the Gap Closest Vector Problem (GapCVP). Specifically, it
+      has been shown that solving LWE is as hard as worst-case instances of GapCVP and SVP on general lattices under
+      quantum and classical reductions.
+    </p>
 
-      ul, ol {
-        color: #ccc;
-        margin-bottom: 15px;
-      }
+    <h2>Shortest Vector Problem (SVP) and Closest Vector Problem (CVP)</h2>
 
-      .example-button {
-        background-color: #d900ee;
-        color: #fff;
-        font-size: 1em;
-        font-weight: bold;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 20px; /* Add some space above the button */
-      }
+    <h3>Shortest Vector Problem (SVP)</h3>
+    <p>
+      Given a lattice $L$, the Shortest Vector Problem (SVP) is to find a shortest non-zero vector in the lattice. More
+      formally, find a vector $\mathbf{v} \in L \setminus \{\mathbf{0}\}$ such that for all $\mathbf{u} \in L \setminus
+      \{\mathbf{0}\}$, we have $||\mathbf{v}|| \leq ||\mathbf{u}||$, where $||\cdot||$ denotes the Euclidean norm.
+    </p>
 
-      .code-block {
-        background-color: #130514;
-        padding: 15px;
-        border-radius: 5px;
-        font-family: monospace;
-        color: #eee;
-        overflow-x: auto; /* Enable horizontal scrolling for long code lines */
-        margin: 10px 0;
-      }
+    <h3>Closest Vector Problem (CVP)</h3>
+    <p>
+      Given a lattice $L$ and a target vector $\mathbf{t} \notin L$, the Closest Vector Problem (CVP) is to find a
+      lattice vector $\mathbf{v} \in L$ that is closest to $\mathbf{t}$. More formally, find $\mathbf{v} \in L$ such
+      that for all $\mathbf{u} \in L$, we have $||\mathbf{t} - \mathbf{v}|| \leq ||\mathbf{t} - \mathbf{u}||$.
+    </p>
 
-      .code {
-        background-color: #130514;
-        padding: 2px 5px;
-        border-radius: 3px;
-        font-family: monospace;
-        color: #eee;
-      }
+    <h3>Relevance to LWE and Cryptography</h3>
+    <p>
+      The presumed hardness of SVP and CVP, especially in high dimensions, is what underpins the security of LWE-based
+      cryptography. If an adversary could efficiently solve SVP or CVP in general lattices, they could potentially break
+      LWE-based cryptosystems. The CRYSTALS-Kyber key-encapsulation mechanism, which goKyber implements, relies on the
+      hardness of Module-LWE (MLWE), a variant of LWE that benefits from structured lattices, yet remains
+      computationally hard.
+    </p>
+    <img src="https://miro.medium.com/v2/resize:fit:1400/1*IIHCkiVRmDky8J8Lr26mbw.png" alt=""
+      style="align-self: center; width: 500px; height: 200px;">
+    <h2>Shor's Algorithm and Post-Quantum Cryptography</h2>
 
-      .equation {
-        display: block;
-        text-align: center;
-        margin: 20px 0;
-        font-size: 1.3em; /* Larger font for equations */
-      }
+    <p>
+      Shor's algorithm, developed by Peter Shor in 1994, is a quantum algorithm that can efficiently factor large
+      integers and compute discrete logarithms in polynomial time on a quantum computer. These problems are the
+      foundation of widely used public-key cryptosystems like RSA and Elliptic Curve Cryptography (ECC). The existence
+      of Shor's algorithm poses a significant threat to the security of these cryptosystems once quantum computers
+      become sufficiently powerful.
+    </p>
+    <img src="./assests/images/Shor's_algorithm_quantum_circuit.png" alt="" style="align-self: center;">
+    <p>
+      Post-quantum cryptography (PQC) is the field dedicated to developing cryptographic systems that are secure against
+      both classical and quantum computers. Lattice-based cryptography, including schemes like Kyber based on LWE/MLWE,
+      is a leading candidate for post-quantum cryptography because there is no known quantum algorithm that can
+      efficiently break these systems. goKyber focuses on implementing CRYSTALS-Kyber to provide a practical and
+      efficient post-quantum encryption framework.
+    </p>
 
-      footer {
-        background-color: #09000a;
-        color: #aaa;
-        text-align: center;
-        border-top: 1px solid #130514;
-        padding: 20px 0; /* Add padding to footer */
-        margin-top: 40px; /* Add top margin to separate from main content */
-      }
+    <h2>Number Theoretic Transform (NTT)</h2>
 
-      footer div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        max-width: 100%;
-        margin: 0 auto;
-      }
-    </style>
-    <script>
-      MathJax = {
-        tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']]
-        },
-        svg: {
-          fontCache: 'global'
-        }
-      };
-    </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-  </head>
-  <body>
-    <header>
-      <div>
-        <a style="font-size: 1.2em;" href="../"><strong>goKyber</strong></a>
-        <span style="color: #aaa; margin-left: 10px;">Docs</span>
-      </div>
-      <div>
-        <!-- You can keep the icons or remove them for a docs page -->
-      </div>
-    </header>
-    <main>
-      <h1>Mathematical Foundations of goKyber</h1>
+    <p>
+      The Number Theoretic Transform (NTT) is an algorithm analogous to the Fast Fourier Transform (FFT) but operates in
+      finite fields (specifically, rings of integers modulo a prime number) rather than complex numbers. In the context
+      of lattice-based cryptography, NTT is crucial for performing fast polynomial multiplication in rings like $R_q =
+      \mathbb{Z}_q[x] / (x^n + 1)$.
+    </p>
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/DIT-FFT-butterfly.svg/1200px-DIT-FFT-butterfly.svg.png"
+      alt="" style="align-self: center; height: 500px;">
+    <p>
+      Polynomial multiplication is a fundamental operation in schemes like Kyber. Direct polynomial multiplication has a
+      quadratic time complexity. However, using NTT, we can reduce the complexity to quasi-linear, specifically $O(n
+      \log n)$, where $n$ is the degree of the polynomials. This speedup is essential for making lattice-based
+      cryptography practical.
+    </p>
+    <p>
+      In Kyber, NTT is used to efficiently perform polynomial multiplication in the ring $R_q$. The process generally
+      involves:
+    <ol>
+      <li><strong>NTT Transformation:</strong> Transform the polynomials into the NTT domain.</li>
+      <li><strong>Pointwise Multiplication:</strong> Perform pointwise multiplication of the transformed polynomials.
+      </li>
+      <li><strong>Inverse NTT Transformation:</strong> Transform the result back from the NTT domain to the polynomial
+        coefficient domain.</li>
+    </ol>
+    <img src="https://craftofcoding.wordpress.com/wp-content/uploads/2021/06/bigo.png" alt=""
+      style="align-self: center;">
+    </p>
 
-      <p>
-        goKyber is built upon the foundations of post-quantum cryptography, specifically leveraging lattice-based cryptography. This document delves into the mathematical concepts that underpin goKyber, providing a detailed explanation suitable for those with a mathematical background. We will explore lattices, polynomials, the Learning with Errors (LWE) problem, related hard problems, and the algorithmic optimizations that make goKyber efficient.
-      </p>
+    <h2>Montgomery Multiplication</h2>
 
-      <h2>Lattices</h2>
+    <p>
+      Montgomery multiplication is an efficient algorithm for performing modular multiplication, especially useful in
+      scenarios where modular reductions need to be performed frequently, like in NTT and other cryptographic
+      operations. Standard modular multiplication involves a division operation to reduce the product modulo $q$, which
+      can be computationally expensive. Montgomery multiplication avoids explicit division.
+    </p>
+    <p>
+      The core idea of Montgomery multiplication is to work with numbers in the "Montgomery domain". For a modulus $q$
+      and a chosen radix $R$ (usually a power of 2 such that $\gcd(q, R) = 1$ and $R > q$), the Montgomery product of
+      two integers $a$ and $b$ (in Montgomery form) effectively computes $a \cdot b \cdot R^{-1} \pmod{q}$ without
+      performing explicit divisions in each step. It relies on additions, subtractions, and multiplications, making it
+      highly efficient in hardware and software implementations.
+    </p>
+    <p>
+      In goKyber and similar implementations, Montgomery multiplication is used to optimize the modular arithmetic
+      operations within the NTT and other parts of the algorithm, contributing to the overall computational efficiency.
+    </p>
 
-      <p>
-        In mathematics, a lattice is a regular array of points in n-dimensional Euclidean space. Formally, a lattice $L$ in $\mathbb{R}^n$ is a discrete additive subgroup of $\mathbb{R}^n$. More concretely, for some basis vectors $\mathbf{b}_1, \mathbf{b}_2, ..., \mathbf{b}_m \in \mathbb{R}^n$ (where $m \leq n$), the lattice generated by these basis vectors is the set of all integer linear combinations:
-      </p>
-      <p class="equation">
-        $L = \{ \sum_{i=1}^{m} x_i \mathbf{b}_i \mid x_i \in \mathbb{Z} \}$
-      </p>
-      <p>
-        When $m = n$, the lattice is called a full-rank lattice. In cryptography, we often work with full-rank lattices in integer vector spaces.  Lattices are fundamental because certain computational problems on lattices are believed to be computationally hard, even for quantum computers. This hardness forms the basis for post-quantum cryptography.
-      </p>
-      <img src="https://www.mdpi.com/signals/signals-05-00012/article_deploy/html/images/signals-05-00012-g001-550.jpg" alt="" style="align-self: center;">
-      <h2>Polynomials and Polynomial Rings</h2>
+    <h2>Computational Efficiency in goKyber</h2>
 
-      <p>
-        Polynomials play a crucial role in lattice-based cryptography, particularly in schemes like Kyber.  We typically work with polynomials in a ring, such as the ring of polynomials with integer coefficients modulo some integer $q$, denoted as $\mathbb{Z}_q[x]$. In Kyber, we specifically use polynomial rings of the form $R_q = \mathbb{Z}_q[x] / (x^n + 1)$, where $n$ is a power of 2 and $(x^n + 1)$ is the ideal generated by $x^n + 1$. This means we are considering polynomials modulo $q$ and also modulo $x^n + 1$.
-      </p>
-      <p>
-        The operation modulo $(x^n + 1)$ is polynomial reduction. When we perform multiplication in $R_q$, after multiplying two polynomials, we reduce the result modulo $q$ for coefficients and modulo $(x^n + 1)$ for the polynomial degree. Reduction modulo $(x^n + 1)$ can be efficiently implemented by replacing $x^n$ with $-1$, $x^{n+1}$ with $-x$, and so on.
-      </p>
+    <p>
+      goKyber is designed to be a high-performance and practical post-quantum encryption framework. Computational
+      efficiency is a key consideration. Several techniques contribute to this efficiency:
+    </p>
+    <ul>
+      <li><strong>NTT for Polynomial Multiplication:</strong> As discussed, NTT dramatically speeds up polynomial
+        multiplication, a core operation in Kyber.</li>
+      <li><strong>Optimized Sampling:</strong> Efficient algorithms are used for sampling error vectors from discrete
+        Gaussian distributions, which is necessary for LWE-based schemes.</li>
+      <li><strong>Montgomery Arithmetic:</strong> Montgomery multiplication and related techniques are employed to
+        optimize modular arithmetic.</li>
+      <li><strong>Vectorization and Parallelism:</strong> Implementations can be further optimized by leveraging vector
+        instructions and parallelism available in modern processors.</li>
+      <li><strong>Parameter Selection:</strong> Kyber parameters are carefully chosen to balance security and
+        performance. The use of structured lattices (module lattices) in MLWE also contributes to efficiency.</li>
+    </ul>
+    <h2>Optimization Results</h2>
+    <img src="./assests/images/NTT.png" alt="" style="align-self: center; padding-bottom: 50px;">
+    <img src="./assests/images/simd.jpg" alt="" style="align-self: center; padding-bottom: 50px;">
+    <img src="./assests/images/vec.jpg" alt="" style="align-self: center; padding-bottom: 50px;">
 
-      <h2>Learning With Errors (LWE) Problem</h2>
+    <a href="./starter.html"><button class="example-button">Get Started with goKyber</button></a>
 
-      <p>
-        The Learning with Errors (LWE) problem is a central problem in lattice-based cryptography. It is conjectured to be computationally hard to solve, even with quantum computers.  The LWE problem comes in two main forms: search LWE and decision LWE. In cryptography, the decision LWE problem is often more relevant.
-      </p>
+    <h2>References</h2>
 
-      <h3>Decision LWE Problem</h3>
-      <p>
-        Given a matrix $\mathbf{A} \in \mathbb{Z}_q^{m \times n}$ and a vector $\mathbf{s} \in \mathbb{Z}_q^{n}$ chosen uniformly at random.  Let $\mathbf{e} \in \mathbb{Z}_q^{m}$ be a "small" error vector, typically with entries chosen from a discrete Gaussian distribution.  We are given samples of the form $(\mathbf{a}_i, b_i)$, where $\mathbf{a}_i$ is the $i$-th row of $\mathbf{A}$ and
-      </p>
-      <p class="equation">
-        $b_i = \langle \mathbf{a}_i, \mathbf{s} \rangle + e_i \pmod{q}$
-      </p>
-      <p>
-        The decision LWE problem asks to distinguish between samples generated as described (from the LWE distribution) and samples where $b_i$ are chosen uniformly at random from $\mathbb{Z}_q$.  In other words, distinguish between $(\mathbf{A}, \mathbf{A}\mathbf{s} + \mathbf{e})$ and $(\mathbf{A}, \mathbf{u})$, where $\mathbf{u}$ is uniformly random in $\mathbb{Z}_q^m$.
-      </p>
+    <ol>
+      <li>
+        D. J. Bernstein, J. Buchmann, and E. Dahmen.
+        <a href="https://eprint.iacr.org/2018/691" target="_blank">
+          "Post-quantum cryptography"
+        </a>. Springer, 2009.
+      </li>
+      <li>
+        V. Lyubashevsky, P. Kirchner, and T. Pöppelmann.
+        <a href="https://eprint.iacr.org/2017/633" target="_blank">
+          "CRYSTALS – Kyber: A CCA-Secure Module-Lattice-Based KEM"
+        </a>. Public Draft, 2019.
+      </li>
+      <li>
+        O. Regev.
+        <a href="https://cims.nyu.edu/~regev/papers/lwe.pdf" target="_blank">
+          "On lattices, learning with errors, random linear codes, and cryptography"
+        </a>. Journal of the ACM (JACM), 56(6), 2009.
+      </li>
+      <li>
+        P. W. Shor.
+        <a href="https://dl.acm.org/doi/10.1137/SIAMJC%2E26%2E1484" target="_blank">
+          "Algorithms for quantum computation: discrete logarithms and factoring"
+        </a>. In Proceedings of the 35th annual symposium on foundations of computer science, pp. 124-134. IEEE, 1994.
+      </li>
+      <li>
+        J. P. Guajardo, S. S. Kumar, G. Paar, and J. Pelzl.
+        <a href="https://link.springer.com/chapter/10.1007/978-3-540-74735-2_29" target="_blank">
+          "Efficient Implementation of NTT-Based Multiplication for Polynomials over Ring Zq"
+        </a>. In Cryptographic Hardware and Embedded Systems - CHES 2007, pp. 283-295. Springer, 2007.
+      </li>
+      <li>
+        T. Cormen, C. Leiserson, R. Rivest, and C. Stein.
+        <a href="https://www.amazon.com/Introduction-Algorithms-3rd-Thomas-Cormen/dp/0262033844" target="_blank">
+          "Introduction to Algorithms"
+        </a> (Chapter 30: Polynomials and the FFT). MIT Press, 2009. (Although this is about FFT, the principles are
+        similar to NTT and chapter explains polynomial multiplication and transform based methods)
+      </li>
+      <li>
+        P. L. Montgomery.
+        <a href="https://www.ams.org/journals/mcom/1985-44-170/S0025-5718-1985-0777282-X/S0025-5718-1985-0777282-X.pdf"
+          target="_blank">
+          "Modular Multiplication without Trial Division"
+        </a>. Mathematics of Computation, 44(170), 519-521, 1985. (Original paper on Montgomery Multiplication)
+      </li>
+      <li>
+        A. Bosselaers, R. Govaerts, and J. Vandewalle.
+        <a href="https://ieeexplore.ieee.org/document/297633" target="_blank">
+          "Comparison of three modular reduction functions"
+        </a>. In Advances in Cryptology—CRYPTO '93, pp. 175-186. Springer, 1994. (Discusses different modular reduction
+        techniques including Montgomery reduction.)
+      </li>
+      <li>
+        Daniel Loebenberger, Peter Schwabe, Simon Oderich, and Johannes Güneysu.
+        <a href="https://eprint.iacr.org/2017/298" target="_blank">
+          "High-Performance NTT-based Polynomial Multiplication for Module-LWE Lattice-Based Cryptography"
+        </a>. IACR eprint, 2017. (Specifically focuses on NTT for MLWE which is very relevant to Kyber)
+      </li>
+    </ol>
+  </main>
+  <footer>
+    <div>
+      <p>Made with <a href="#" style="color: #d900ff">💜</a> by goKyber Team</a></p>
+    </div>
+  </footer>
+</body>
 
-      <h3>Hardness of LWE</h3>
-      <p>
-        The hardness of LWE is based on the presumed difficulty of solving certain lattice problems in their worst-case scenario, such as the Shortest Vector Problem (SVP) and the Gap Closest Vector Problem (GapCVP).  Specifically, it has been shown that solving LWE is as hard as worst-case instances of GapCVP and SVP on general lattices under quantum and classical reductions.
-      </p>
-
-      <h2>Shortest Vector Problem (SVP) and Closest Vector Problem (CVP)</h2>
-
-      <h3>Shortest Vector Problem (SVP)</h3>
-      <p>
-        Given a lattice $L$, the Shortest Vector Problem (SVP) is to find a shortest non-zero vector in the lattice.  More formally, find a vector $\mathbf{v} \in L \setminus \{\mathbf{0}\}$ such that for all $\mathbf{u} \in L \setminus \{\mathbf{0}\}$, we have $||\mathbf{v}|| \leq ||\mathbf{u}||$, where $||\cdot||$ denotes the Euclidean norm.
-      </p>
-
-      <h3>Closest Vector Problem (CVP)</h3>
-      <p>
-        Given a lattice $L$ and a target vector $\mathbf{t} \notin L$, the Closest Vector Problem (CVP) is to find a lattice vector $\mathbf{v} \in L$ that is closest to $\mathbf{t}$. More formally, find $\mathbf{v} \in L$ such that for all $\mathbf{u} \in L$, we have $||\mathbf{t} - \mathbf{v}|| \leq ||\mathbf{t} - \mathbf{u}||$.
-      </p>
-
-      <h3>Relevance to LWE and Cryptography</h3>
-      <p>
-        The presumed hardness of SVP and CVP, especially in high dimensions, is what underpins the security of LWE-based cryptography.  If an adversary could efficiently solve SVP or CVP in general lattices, they could potentially break LWE-based cryptosystems. The CRYSTALS-Kyber key-encapsulation mechanism, which goKyber implements, relies on the hardness of Module-LWE (MLWE), a variant of LWE that benefits from structured lattices, yet remains computationally hard.
-      </p>
-      <img src="https://miro.medium.com/v2/resize:fit:1400/1*IIHCkiVRmDky8J8Lr26mbw.png" alt="" style="align-self: center; width: 500px; height: 200px;">
-      <h2>Shor's Algorithm and Post-Quantum Cryptography</h2>
-
-      <p>
-        Shor's algorithm, developed by Peter Shor in 1994, is a quantum algorithm that can efficiently factor large integers and compute discrete logarithms in polynomial time on a quantum computer. These problems are the foundation of widely used public-key cryptosystems like RSA and Elliptic Curve Cryptography (ECC).  The existence of Shor's algorithm poses a significant threat to the security of these cryptosystems once quantum computers become sufficiently powerful.
-      </p>
-      <img src="./assests/images/Shor's_algorithm_quantum_circuit.png" alt="" style="align-self: center;"> 
-      <p>
-        Post-quantum cryptography (PQC) is the field dedicated to developing cryptographic systems that are secure against both classical and quantum computers. Lattice-based cryptography, including schemes like Kyber based on LWE/MLWE, is a leading candidate for post-quantum cryptography because there is no known quantum algorithm that can efficiently break these systems.  goKyber focuses on implementing CRYSTALS-Kyber to provide a practical and efficient post-quantum encryption framework.
-      </p>
-
-      <h2>Number Theoretic Transform (NTT)</h2>
-
-      <p>
-        The Number Theoretic Transform (NTT) is an algorithm analogous to the Fast Fourier Transform (FFT) but operates in finite fields (specifically, rings of integers modulo a prime number) rather than complex numbers.  In the context of lattice-based cryptography, NTT is crucial for performing fast polynomial multiplication in rings like $R_q = \mathbb{Z}_q[x] / (x^n + 1)$.
-      </p>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/DIT-FFT-butterfly.svg/1200px-DIT-FFT-butterfly.svg.png" alt="" style="align-self: center; height: 500px;">
-      <p>
-        Polynomial multiplication is a fundamental operation in schemes like Kyber.  Direct polynomial multiplication has a quadratic time complexity.  However, using NTT, we can reduce the complexity to quasi-linear, specifically $O(n \log n)$, where $n$ is the degree of the polynomials.  This speedup is essential for making lattice-based cryptography practical.
-      </p>
-      <p>
-        In Kyber, NTT is used to efficiently perform polynomial multiplication in the ring $R_q$.  The process generally involves:
-        <ol>
-          <li><strong>NTT Transformation:</strong> Transform the polynomials into the NTT domain.</li>
-          <li><strong>Pointwise Multiplication:</strong> Perform pointwise multiplication of the transformed polynomials.</li>
-          <li><strong>Inverse NTT Transformation:</strong> Transform the result back from the NTT domain to the polynomial coefficient domain.</li>
-        </ol>
-        <img src="https://craftofcoding.wordpress.com/wp-content/uploads/2021/06/bigo.png" alt="" style="align-self: center;">
-      </p>
-
-      <h2>Montgomery Multiplication</h2>
-
-      <p>
-        Montgomery multiplication is an efficient algorithm for performing modular multiplication, especially useful in scenarios where modular reductions need to be performed frequently, like in NTT and other cryptographic operations.  Standard modular multiplication involves a division operation to reduce the product modulo $q$, which can be computationally expensive.  Montgomery multiplication avoids explicit division.
-      </p>
-      <p>
-        The core idea of Montgomery multiplication is to work with numbers in the "Montgomery domain".  For a modulus $q$ and a chosen radix $R$ (usually a power of 2 such that $\gcd(q, R) = 1$ and $R > q$), the Montgomery product of two integers $a$ and $b$ (in Montgomery form) effectively computes $a \cdot b \cdot R^{-1} \pmod{q}$ without performing explicit divisions in each step.  It relies on additions, subtractions, and multiplications, making it highly efficient in hardware and software implementations.
-      </p>
-      <p>
-        In goKyber and similar implementations, Montgomery multiplication is used to optimize the modular arithmetic operations within the NTT and other parts of the algorithm, contributing to the overall computational efficiency.
-      </p>
-
-      <h2>Computational Efficiency in goKyber</h2>
-
-      <p>
-        goKyber is designed to be a high-performance and practical post-quantum encryption framework. Computational efficiency is a key consideration.  Several techniques contribute to this efficiency:
-      </p>
-      <ul>
-        <li><strong>NTT for Polynomial Multiplication:</strong> As discussed, NTT dramatically speeds up polynomial multiplication, a core operation in Kyber.</li>
-        <li><strong>Optimized Sampling:</strong> Efficient algorithms are used for sampling error vectors from discrete Gaussian distributions, which is necessary for LWE-based schemes.</li>
-        <li><strong>Montgomery Arithmetic:</strong> Montgomery multiplication and related techniques are employed to optimize modular arithmetic.</li>
-        <li><strong>Vectorization and Parallelism:</strong>  Implementations can be further optimized by leveraging vector instructions and parallelism available in modern processors.</li>
-        <li><strong>Parameter Selection:</strong> Kyber parameters are carefully chosen to balance security and performance. The use of structured lattices (module lattices) in MLWE also contributes to efficiency.</li>
-      </ul>
-      <h2>Optimization Results</h2>
-      <img src="./assests/images/NTT.png" alt="" style="align-self: center; padding-bottom: 50px;">
-      <img src="./assests/images/simd.jpg" alt="" style="align-self: center; padding-bottom: 50px;">
-      <img src="./assests/images/vec.jpg" alt="" style="align-self: center; padding-bottom: 50px;">
-
-      <a href="./starter.html"><button class="example-button" >Get Started with goKyber</button></a>
-
-    </main>
-    <footer>
-      <div>
-        <p>Made with <a href="#" style="color: #d900ff">💜</a> by goKyber Team</a></p>
-      </div>
-    </footer>
-  </body>
 </html>
