@@ -1,5 +1,7 @@
 # goKyber: A High-Performance and Practical Post-Quantum Encryption Framework
 
+<p align="center"> <img src="./docs/assests/images/logo.png" height=400></p>
+
 **goKyber** is an uncomplicated and, optimally, tuned encryption library designed to make post-quantum cryptographic algorithms, specifically the CRYSTALS-Kyber key-encapsulation mechanism (KEM), both attainable and applicable. It balances simplicity with good performance to lower the barriers associated with adopting lattice-based encryption methodologies. Whether investigating secure communications or teaching fundamental cryptographic principles, goKyber aims to provide a friendly, instructive, and powerful toolkit.
 
 ## Features
