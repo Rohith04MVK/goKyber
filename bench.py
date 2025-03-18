@@ -106,7 +106,7 @@ def main():
     # ---------------------------
     # Plotting
     # ---------------------------
-    algorithms = ['RSA', 'ECC', 'DH', 'Kyber']
+    algorithms = ['RSA', 'ECC', 'DH', 'goKyber']
 
     # No need to round *before* plotting, just format for display
     times_data = [rsa_times, ecc_times, dh_times, kyber_times]
