@@ -191,7 +191,7 @@
   </header>
   <main>
     <h1>Mathematical Foundations of goKyber</h1>
-
+    <img src="./assests/images/logo.jpeg" alt="" style="align-self: center;" height="400px">
     <p>
       goKyber is built upon the foundations of post-quantum cryptography, specifically leveraging lattice-based
       cryptography. This document delves into the mathematical concepts that underpin goKyber, providing a detailed
@@ -237,6 +237,9 @@
       difficulty of finding a significantly reduced basis in high-dimensional lattices contributes to the hardness of
       lattice problems.
     </p>
+
+    <img src="https://www.researchgate.net/publication/340108818/figure/fig1/AS:872521280811015@1585036692903/A-good-basis-green-has-short-and-nearly-orthogonal-vectors-while-a-bad-basis-red-is.png"
+    alt="" style="align-self: center;">
 
     <h3>Ideal Lattices and Module Lattices</h3>
     <p>
@@ -667,7 +670,8 @@ function vectorized_poly_add(f_coeffs, g_coeffs, n):
             polynomial coefficients into vector registers and process them in parallel with a single instruction.
             Instruction sets like <strong>AVX2</strong> and <strong>AVX-512</strong> provide wide registers (256-bit,
             512-bit respectively) enabling significant speedups. This is particularly effective for operations like
-            polynomial addition, subtraction, and pointwise multiplication in the NTT domain.</li>
+            polynomial addition, subtraction, and pointwise multiplication in the NTT domain.
+          </li>
 
 
           <li><strong>Memory Access Patterns and Cache Optimization:</strong> Efficient implementations pay close
