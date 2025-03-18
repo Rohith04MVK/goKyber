@@ -3,71 +3,52 @@ package main
 import (
 	"crypto/subtle"
 	"fmt"
+	"time"
 
 	gokyber "github.com/Rohith04MVK/goKyber/goKyber"
 )
 
-func main() {
-	// Kyber-768 Example: Simulating Communication Between Two Parties (Alice and Bob)
+// BenchmarkKyber tests the total time for key generation, encryption, and decryption
+func BenchmarkKyber(securityLevel int) {
+	fmt.Printf("\nBenchmarking Kyber-%d:\n", securityLevel)
 
-	fmt.Println("Kyber-768 Key Exchange Between Alice and Bob")
-	fmt.Println("---------------------------------------------")
+	totalStart := time.Now()
 
-	// --- Alice's Side ---
-	fmt.Println("\nAlice:")
-
-	// Alice generates a Kyber-768 key pair
-	alicePrivateKey, alicePublicKey, err := gokyber.KemKeypair(768)
+	start := time.Now()
+	privateKey, publicKey, err := gokyber.KemKeypair(securityLevel)
 	if err != nil {
-		fmt.Println("  Error: Alice failed to generate key pair:", err)
+		fmt.Println("  Error: Failed to generate key pair:", err)
 		return
 	}
-	fmt.Println("  1. Generates a key pair.")
+	keyGenTime := time.Since(start)
 
-	// Alice sends her public key to Bob (in a real scenario, this would be over a network)
-	fmt.Println("  2. Sends her public key to Bob.")
-
-	// --- Bob's Side ---
-	fmt.Println("\nBob:")
-
-	// Bob receives Alice's public key
-	fmt.Println("  1. Receives Alice's public key.")
-
-	// Bob encrypts a message (using Alice's public key) to generate a ciphertext and a shared secret
-	ciphertext, sharedSecretBob, err := gokyber.KemEncrypt(alicePublicKey, 768)
+	start = time.Now()
+	ciphertext, sharedSecretBob, err := gokyber.KemEncrypt(publicKey, securityLevel)
 	if err != nil {
-		fmt.Println("  Error: Bob failed to encrypt:", err)
+		fmt.Println("  Error: Failed to encrypt:", err)
 		return
 	}
-	fmt.Println("  2. Encrypts a message using Alice's public key, generating a ciphertext and a shared secret.")
+	encryptTime := time.Since(start)
 
-	// Bob sends the ciphertext to Alice
-	fmt.Println("  3. Sends the ciphertext to Alice.")
-	fmt.Printf("     Ciphertext (truncated): %x...\n", ciphertext[:25]) // Show a truncated ciphertext
-
-	// --- Alice's Side ---
-	fmt.Println("\nAlice:")
-
-	// Alice receives the ciphertext from Bob
-	fmt.Println("  3. Receives the ciphertext from Bob.")
-
-	// Alice decrypts the ciphertext using her private key to get the shared secret
-	sharedSecretAlice, err := gokyber.KemDecrypt(ciphertext, alicePrivateKey, 768)
+	start = time.Now()
+	sharedSecretAlice, err := gokyber.KemDecrypt(ciphertext, privateKey, securityLevel)
 	if err != nil {
-		fmt.Println("  Error: Alice failed to decrypt:", err)
+		fmt.Println("  Error: Failed to decrypt:", err)
 		return
 	}
-	fmt.Println("  4. Decrypts the ciphertext using her private key to obtain the shared secret.")
+	decryptTime := time.Since(start)
 
-	// --- Verification ---
-	fmt.Println("\nVerification:")
-
-	fmt.Printf("  Alice's shared secret: %x\n", sharedSecretAlice)
-	fmt.Printf("  Bob's shared secret : %x\n", sharedSecretBob)
+	totalTime := time.Since(totalStart)
 
 	if subtle.ConstantTimeCompare(sharedSecretAlice, sharedSecretBob) == 1 {
-		fmt.Println("  Shared secrets match! Secure communication established.")
+		fmt.Printf("  Total time: %v (KeyGen: %v, Encrypt: %v, Decrypt: %v) - Success\n", totalTime, keyGenTime, encryptTime, decryptTime)
 	} else {
-		fmt.Println("  Shared secrets do not match! Something went wrong.")
+		fmt.Printf("  Total time: %v (KeyGen: %v, Encrypt: %v, Decrypt: %v) - Failure\n", totalTime, keyGenTime, encryptTime, decryptTime)
 	}
+}
+
+func main() {
+	BenchmarkKyber(512)
+	BenchmarkKyber(768)
+	BenchmarkKyber(1024)
 }
