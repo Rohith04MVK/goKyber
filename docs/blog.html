@@ -698,65 +698,71 @@ function vectorized_poly_add(f_coeffs, g_coeffs, n):
 
         <ol>
           <li>
-            D. J. Bernstein, J. Buchmann, and E. Dahmen.
-            <a href="https://eprint.iacr.org/2018/691" target="_blank">
-              "Post-quantum cryptography"
-            </a>. Springer, 2009.
+              D. J. Bernstein, J. Buchmann, and E. Dahmen.
+              <a href="https://eprint.iacr.org/2018/691" target="_blank">
+                  "Post-quantum cryptography"
+              </a>. Springer, 2009.<br>
+              <strong>Contribution:</strong> Provided a broad overview and foundational understanding of post-quantum cryptography, setting the context for the need for algorithms like Kyber.  This served as general background on the threat of quantum computers to classical cryptography.
           </li>
           <li>
-            V. Lyubashevsky, P. Kirchner, and T. Pöppelmann.
-            <a href="https://eprint.iacr.org/2017/633" target="_blank">
-              "CRYSTALS - Kyber: A CCA-Secure Module-Lattice-Based KEM"
-            </a>. Public Draft, 2019.
+              V. Lyubashevsky, P. Kirchner, and T. Pöppelmann.
+              <a href="https://eprint.iacr.org/2017/633" target="_blank">
+                  "CRYSTALS - Kyber: A CCA-Secure Module-Lattice-Based KEM"
+              </a>. Public Draft, 2019.<br>
+              <strong>Contribution:</strong> This is the primary Kyber specification document.  We took the core algorithm design, parameter sets, and security definitions directly from this paper.  It defines the key encapsulation mechanism (KEM) based on the Module Learning With Errors (MLWE) problem.
           </li>
           <li>
-            O. Regev.
-            <a href="https://cims.nyu.edu/~regev/papers/lwe.pdf" target="_blank">
-              "On lattices, learning with errors, random linear codes, and cryptography"
-            </a>. Journal of the ACM (JACM), 56(6), 2009.
+              O. Regev.
+              <a href="https://cims.nyu.edu/~regev/papers/lwe.pdf" target="_blank">
+                  "On lattices, learning with errors, random linear codes, and cryptography"
+              </a>. Journal of the ACM (JACM), 56(6), 2009.<br>
+              <strong>Contribution:</strong> Introduced the Learning With Errors (LWE) problem, which forms the theoretical foundation for many lattice-based cryptographic schemes, including the Module-LWE problem used in Kyber.  This paper established the hardness of LWE and its connection to lattice problems.
           </li>
           <li>
-            P. W. Shor.
-            <a href="https://dl.acm.org/doi/10.1137/SIAMJC%2E26%2E1484" target="_blank">
-              "Algorithms for quantum computation: discrete logarithms and factoring"
-            </a>. In Proceedings of the 35th annual symposium on foundations of computer science, pp. 124-134. IEEE,
-            1994.
+              P. W. Shor.
+              <a href="https://dl.acm.org/doi/10.1137/SIAMJC%2E26%2E1484" target="_blank">
+                  "Algorithms for quantum computation: discrete logarithms and factoring"
+              </a>. In Proceedings of the 35th annual symposium on foundations of computer science, pp. 124-134. IEEE,
+              1994.<br>
+              <strong>Contribution:</strong>  Demonstrated the vulnerability of widely used classical cryptographic algorithms (like RSA and ECC) to quantum computers.  This paper highlights the *need* for post-quantum cryptography, motivating the development of algorithms like Kyber.
           </li>
           <li>
-            J. P. Guajardo, S. S. Kumar, G. Paar, and J. Pelzl.
-            <a href="https://link.springer.com/chapter/10.1007/978-3-540-74735-2_29" target="_blank">
-              "Efficient Implementation of NTT-Based Multiplication for Polynomials over Ring Zq"
-            </a>. In Cryptographic Hardware and Embedded Systems - CHES 2007, pp. 283-295. Springer, 2007.
+              J. P. Guajardo, S. S. Kumar, G. Paar, and J. Pelzl.
+              <a href="https://link.springer.com/chapter/10.1007/978-3-540-74735-2_29" target="_blank">
+                  "Efficient Implementation of NTT-Based Multiplication for Polynomials over Ring Zq"
+              </a>. In Cryptographic Hardware and Embedded Systems - CHES 2007, pp. 283-295. Springer, 2007.<br>
+              <strong>Contribution:</strong> Provided insights into the efficient implementation of the Number Theoretic Transform (NTT) for polynomial multiplication, a crucial component for the performance of Kyber.  This work helped inform our choice of NTT for polynomial arithmetic.
           </li>
           <li>
-            T. Cormen, C. Leiserson, R. Rivest, and C. Stein.
-            <a href="https://www.amazon.com/Introduction-Algorithms-3rd-Thomas-Cormen/dp/0262033844" target="_blank">
-              "Introduction to Algorithms"
-            </a> (Chapter 30: Polynomials and the FFT). MIT Press, 2009. (Although this is about FFT, the principles are
-            similar to NTT and chapter explains polynomial multiplication and transform based methods)
+              T. Cormen, C. Leiserson, R. Rivest, and C. Stein.
+              <a href="https://www.amazon.com/Introduction-Algorithms-3rd-Thomas-Cormen/dp/0262033844" target="_blank">
+                  "Introduction to Algorithms"
+              </a> (Chapter 30: Polynomials and the FFT). MIT Press, 2009.<br>
+              <strong>Contribution:</strong>  While focusing on the Fast Fourier Transform (FFT), this chapter provided a strong foundation for understanding polynomial multiplication and transform-based methods in general.  The principles of the FFT are closely related to the NTT, making this a valuable resource for understanding the underlying mathematical concepts.
           </li>
           <li>
-            P. L. Montgomery.
-            <a href="https://www.ams.org/journals/mcom/1985-44-170/S0025-5718-1985-0777282-X/S0025-5718-1985-0777282-X.pdf"
-              target="_blank">
-              "Modular Multiplication without Trial Division"
-            </a>. Mathematics of Computation, 44(170), 519-521, 1985. (Original paper on Montgomery Multiplication)
+              P. L. Montgomery.
+              <a href="https://www.ams.org/journals/mcom/1985-44-170/S0025-5718-1985-0777282-X/S0025-5718-1985-0777282-X.pdf"
+                 target="_blank">
+                  "Modular Multiplication without Trial Division"
+              </a>. Mathematics of Computation, 44(170), 519-521, 1985.<br>
+              <strong>Contribution:</strong> Introduced Montgomery multiplication, an efficient algorithm for performing modular multiplication.  This is a critical optimization for implementing the modular arithmetic operations within Kyber and other cryptographic schemes. We likely used Montgomery Reduction, or a variant, for modular arithmetic.
           </li>
           <li>
-            A. Bosselaers, R. Govaerts, and J. Vandewalle.
-            <a href="https://ieeexplore.ieee.org/document/297633" target="_blank">
-              "Comparison of three modular reduction functions"
-            </a>. In Advances in Cryptology—CRYPTO '93, pp. 175-186. Springer, 1994. (Discusses different modular
-            reduction
-            techniques including Montgomery reduction.)
+              A. Bosselaers, R. Govaerts, and J. Vandewalle.
+              <a href="https://ieeexplore.ieee.org/document/297633" target="_blank">
+                  "Comparison of three modular reduction functions"
+              </a>. In Advances in Cryptology—CRYPTO '93, pp. 175-186. Springer, 1994.<br>
+              <strong>Contribution:</strong>  Compared different modular reduction techniques, including Montgomery reduction.  This paper helped in understanding the trade-offs and selecting an appropriate modular reduction method for our implementation.
           </li>
           <li>
-            Daniel Loebenberger, Peter Schwabe, Simon Oderich, and Johannes Güneysu.
-            <a href="https://eprint.iacr.org/2017/298" target="_blank">
-              "High-Performance NTT-based Polynomial Multiplication for Module-LWE Lattice-Based Cryptography"
-            </a>. IACR eprint, 2017. (Specifically focuses on NTT for MLWE which is very relevant to Kyber)
+              Daniel Loebenberger, Peter Schwabe, Simon Oderich, and Johannes Güneysu.
+              <a href="https://eprint.iacr.org/2017/298" target="_blank">
+                  "High-Performance NTT-based Polynomial Multiplication for Module-LWE Lattice-Based Cryptography"
+              </a>. IACR eprint, 2017.<br>
+              <strong>Contribution:</strong>  Provided specific guidance and optimizations for using NTT in the context of Module-LWE, which is directly relevant to Kyber.  This paper likely offered practical insights into achieving high performance for the NTT-based polynomial multiplication within our Kyber implementation.
           </li>
-        </ol>
+      </ol>
   </main>
   <footer>
     <div>
