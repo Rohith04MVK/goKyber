@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 import re
 from src.goKyber.algos_list import get_algo
+from utils import format_time
 
 # ---------------------------
 # Run and parse Kyber benchmark output
@@ -64,21 +65,6 @@ def measure_dh_combined(key_size):
     shared_key2 = dh_key2.exchange(dh_key1.public_key())
     assert shared_key1 == shared_key2
     return round(time.time() - start, 6)
-
-# ---------------------------
-# Format time function
-# ---------------------------
-
-def format_time(seconds):
-    """Formats time in seconds to a human-readable string (s, ms, µs, ns)."""
-    if seconds >= 1:
-        return f"{seconds:.3f}s"
-    elif seconds >= 1e-3:
-        return f"{seconds * 1e3:.3f}ms"
-    elif seconds >= 1e-6:
-        return f"{seconds * 1e6:.2f}µs"
-    else:
-        return f"{seconds * 1e9:.2f}ns"
 
 # ---------------------------
 # Main benchmark function
