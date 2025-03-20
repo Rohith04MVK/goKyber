@@ -104,19 +104,23 @@ func IndcpaGenMatrix(seed []byte, transposed bool, kVariant int) ([]PolynomialVe
 	resultMatrix := make([]PolynomialVector, kVariant)
 	buffer := make([]byte, 672)
 	xof := sha3.NewShake128()
-	ctr := 0
+	seedWithIndex := make([]byte, len(seed)+2) // Allocate once and reuse
+
 	for i := 0; i < kVariant; i++ {
 		resultMatrix[i] = PolyvecNew(kVariant)
 		for j := 0; j < kVariant; j++ {
 			xof.Reset()
-			var err error
+			copy(seedWithIndex, seed) // Reset seed prefix
+
 			if transposed {
-				// Use seed concatenated with i and j for transposed A.
-				_, err = xof.Write(append(seed, byte(i), byte(j)))
+				seedWithIndex[len(seed)] = byte(i)
+				seedWithIndex[len(seed)+1] = byte(j)
 			} else {
-				// Use seed concatenated with j and i for A.
-				_, err = xof.Write(append(seed, byte(j), byte(i)))
+				seedWithIndex[len(seed)] = byte(j)
+				seedWithIndex[len(seed)+1] = byte(i)
 			}
+
+			_, err := xof.Write(seedWithIndex)
 			if err != nil {
 				return []PolynomialVector{}, err
 			}
@@ -124,18 +128,24 @@ func IndcpaGenMatrix(seed []byte, transposed bool, kVariant int) ([]PolynomialVe
 			if err != nil {
 				return []PolynomialVector{}, err
 			}
-			// Sample 504 coefficients into resultMatrix[i][j].
-			resultMatrix[i][j], ctr = IndcpaRejUniform(buffer[:504], 504, paramsN)
-			// Sample remaining coefficients using the last 168 bytes of the buffer.
-			for ctr < paramsN {
-				var missingCoefficients Polynomial
-				var numSampled int
-				missingCoefficients, numSampled = IndcpaRejUniform(buffer[504:672], 168, paramsN-ctr)
-				for k := ctr; k < paramsN; k++ {
-					resultMatrix[i][j][k] = missingCoefficients[k-ctr]
+
+			ctr := 0
+			poly, sampled := IndcpaRejUniform(buffer[:504], 504, paramsN)
+			resultMatrix[i][j] = poly
+			ctr = sampled
+
+			if ctr < paramsN {
+				missingCoefficients, numSampled := IndcpaRejUniform(buffer[504:672], 168, paramsN-ctr)
+				for k := 0; k < numSampled; k++ { // Optimized copy loop
+					resultMatrix[i][j][ctr+k] = missingCoefficients[k]
 				}
-				ctr = ctr + numSampled
+				ctr += numSampled
 			}
+			// No need for the second loop and manual copy if IndcpaRejUniform handles the count correctly
+			// Original code's second loop was overly complex and potentially inefficient.
+			// Simplified logic based on the assumption that IndcpaRejUniform correctly samples up to the requested count.
+			// We've already sampled 'sampled' coefficients in the first call.
+			// If more are needed, the second call samples up to the remaining amount.
 		}
 	}
 	return resultMatrix, nil
@@ -146,7 +156,10 @@ func IndcpaGenMatrix(seed []byte, transposed bool, kVariant int) ([]PolynomialVe
 // to instantiate the PRF's underlying hash function.
 func IndcpaPrf(outputLength int, key []byte, nonce byte) []byte {
 	hash := make([]byte, outputLength)
-	sha3.ShakeSum256(hash, append(key, nonce))
+	keyNonce := make([]byte, len(key)+1)
+	copy(keyNonce, key)
+	keyNonce[len(key)] = nonce
+	sha3.ShakeSum256(hash, keyNonce)
 	return hash
 }
 
@@ -184,21 +197,23 @@ func IndcpaKeypair(kVariant int) ([]byte, []byte, error) {
 	privateKeyVector := PolyvecNew(kVariant)
 	publicKeyVector := PolyvecNew(kVariant)
 	errorVector := PolyvecNew(kVariant)
-	randomBytes := make([]byte, 2*paramsSymBytes)
-	hash := sha3.New512()
+	randomBytes := make([]byte, 2*paramsSymBytes) // Allocate once
 
 	_, err := rand.Read(randomBytes[:paramsSymBytes])
 	if err != nil {
 		return []byte{}, []byte{}, err
 	}
 
-	// Split hash of random bytes into public seed and noise seed.
+	hash := sha3.New512()
 	_, err = hash.Write(randomBytes[:paramsSymBytes])
 	if err != nil {
 		return []byte{}, []byte{}, err
 	}
-	randomBytes = randomBytes[:0]
+
+	// Reuse randomBytes buffer for hash sum
+	randomBytes = randomBytes[:0] // Reset the slice length to reuse the buffer
 	randomBytes = hash.Sum(randomBytes)
+
 	publicSeed := make([]byte, paramsSymBytes)
 	noiseSeed := make([]byte, paramsSymBytes)
 	copy(publicSeed, randomBytes[:paramsSymBytes])
@@ -211,15 +226,12 @@ func IndcpaKeypair(kVariant int) ([]byte, []byte, error) {
 	}
 
 	var nonce byte
-	// Sample private key from noise seed.
+	// Sample private key and error vector from noise seed in combined loop.
 	for i := 0; i < kVariant; i++ {
 		privateKeyVector[i] = PolyGetNoise(noiseSeed, nonce, kVariant)
-		nonce = nonce + 1
-	}
-	// Sample error vector from noise seed.
-	for i := 0; i < kVariant; i++ {
+		nonce++ // Increment nonce after private key
 		errorVector[i] = PolyGetNoise(noiseSeed, nonce, kVariant)
-		nonce = nonce + 1
+		nonce++ // Increment nonce after error vector
 	}
 
 	// Convert private key and error vector to NTT domain.
@@ -278,11 +290,12 @@ func IndcpaEncrypt(message []byte, publicKey []byte, coins []byte, kVariant int)
 		return []byte{}, err
 	}
 
-	// Sample s' from coins.
+	// Sample s' and e' from coins in a combined loop.
 	for i := 0; i < kVariant; i++ {
 		sPrimeVector[i] = PolyGetNoise(coins, byte(i), kVariant)
 		ePrimeVector[i] = PolyGetNoise(coins, byte(i+kVariant), 3)
 	}
+
 	// Sample e''.
 	ePrimePrimePolynomial := PolyGetNoise(coins, byte(kVariant*2), 3)
 

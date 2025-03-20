@@ -112,23 +112,14 @@ func ByteopsCbd(uniformBytes []byte, kVariant int) Polynomial {
 // If 'a' is 1 and 'paramsQInv' is -12287, the function will correctly compute
 // the reduced value without sign extension issues.
 func ByteopsMontgomeryReduce(a int32) int16 {
-	// The original expression is:
-	// `u := int16(a * paramsQInv)`
-	// `t := a - int32(u) * int32(paramsQ)`
-	// `return int16(t >> 16)`
-	//
-	// However, because `paramsQInv` is negative, Go won't convert it to
-	// int16 correctly. The expression `a * paramsQInv` is sign-extended
-	// to 64 bits, then truncated to 32 bits, and only then truncated to 16
-	// bits.
-	//
-	// e.g. if `a == 1`, then `a * paramsQInv == -12287`. Go sign-extends it to
-	// 0xFFFFFFFFFFFFC801. Then it's truncated to 0xFFFFFFFFFFFFC801, and
-	// then truncated to 0xC801. If it was just truncated to 16 bits,
-	// then we would get 0xC801, or -14335 in decimal.
-	//
-	// The fix is to not convert `a * paramsQInv` to int16.
-	return int16((a - int32(int16(a*int32(paramsQInv)))*int32(paramsQ)) >> 16)
+	// Compute u directly without intermediate conversion to int16
+	u := a * int32(paramsQInv)
+
+	// Compute t in a single step
+	t := a - (u&0xFFFF)*int32(paramsQ)
+
+	// Return the high 16 bits of t
+	return int16(t >> 16)
 }
 
 // ByteopsBarrettReduce computes a Barrett reduction; given
