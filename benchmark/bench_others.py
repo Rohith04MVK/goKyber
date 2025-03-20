@@ -54,9 +54,9 @@ def main():
     times_data = [kyber1_times, kyber2_times]
 
     x = np.arange(len(algorithms))
-    width = 0.2
+    width = 0.3
 
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig, ax = plt.subplots(figsize=(12, 8))
     bar1 = ax.bar(x - width, [t[0] for t in times_data], width, label='Kyber-512', color='skyblue')
     bar2 = ax.bar(x, [t[1] for t in times_data], width, label='Kyber-768', color='lightgreen')
     bar3 = ax.bar(x + width, [t[2] for t in times_data], width, label='Kyber-1024', color='lightcoral')

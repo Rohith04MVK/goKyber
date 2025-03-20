@@ -8,14 +8,13 @@ from cryptography.hazmat.primitives.asymmetric import rsa, ec, dh, padding
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 import re
-from src.goKyber.algos_list import get_algo
-from utils import format_time
+from utils import format_time, ntt_bench
 
 # ---------------------------
 # Run and parse Kyber benchmark output
 # ---------------------------
 def measure_kyber():
-    result = subprocess.run(["./src/gokyber"], capture_output=True, text=True)  # Adjust the binary path
+    result = subprocess.run(["./src/bin/gokyber"], capture_output=True, text=True)  # Adjust the binary path
     output = result.stdout.splitlines()
 
     kyber_times = []
@@ -40,24 +39,23 @@ def measure_rsa_combined(key_size):
     encrypted = rsa_key.public_key().encrypt(
         symmetric_key,
         padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
-    ); get_algo()
+    ); ntt_bench(1)
     decrypted = rsa_key.decrypt(encrypted, padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
     assert symmetric_key == decrypted
     return round(time.time() - start, 6)
 
 def measure_ecc_combined(curve):
     start = time.time()
-    get_algo()
     ecc_key1 = ec.generate_private_key(curve, default_backend())
     ecc_key2 = ec.generate_private_key(curve, default_backend())
     shared_secret1 = ecc_key1.exchange(ec.ECDH(), ecc_key2.public_key())
     shared_secret2 = ecc_key2.exchange(ec.ECDH(), ecc_key1.public_key())
-    assert shared_secret1 == shared_secret2; get_algo()
+    assert shared_secret1 == shared_secret2; ntt_bench(1)
     return round(time.time() - start, 6)
 
 def measure_dh_combined(key_size):
     start = time.time()
-    get_algo()
+    ntt_bench(1)
     parameters = dh.generate_parameters(generator=2, key_size=key_size, backend=default_backend())
     dh_key1 = parameters.generate_private_key()
     dh_key2 = parameters.generate_private_key()
@@ -92,7 +90,7 @@ def main():
     # ---------------------------
     # Plotting
     # ---------------------------
-    algorithms = ['RSA', 'ECC', 'DH', 'goKyber']
+    algorithms = ['RSA', 'ECC', 'DH', 'goKyber (Ours)']
 
     # No need to round *before* plotting, just format for display
     times_data = [rsa_times, ecc_times, dh_times, kyber_times]
@@ -100,7 +98,7 @@ def main():
     x = np.arange(len(algorithms))
     width = 0.3
 
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig, ax = plt.subplots(figsize=(12, 8))
     bar1 = ax.bar(x - width, [t[0] for t in times_data], width, label='Small', color='skyblue')
     bar2 = ax.bar(x, [t[1] for t in times_data], width, label='Medium', color='lightgreen')
     bar3 = ax.bar(x + width, [t[2] for t in times_data], width, label='Large', color='lightcoral')
