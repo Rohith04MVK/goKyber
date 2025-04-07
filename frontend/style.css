@@ -6,6 +6,7 @@ body {
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;
+  backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
