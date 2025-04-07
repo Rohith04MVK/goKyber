@@ -2,10 +2,11 @@
 body {
   font-family: Arial, sans-serif;
   background-color: white;
-  background-image: url('/home/achala/Downloads/backdrop.svg');
+  background-image: url('..docs/assests/backdrop.svg');
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;
+  backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
