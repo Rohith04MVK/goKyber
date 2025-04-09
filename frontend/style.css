@@ -2,7 +2,7 @@
 body {
   font-family: Arial, sans-serif;
   background-color: white;
-  background-image: url('..docs/assests/backdrop.svg');
+  background-image: url('../docs/assests/backdrop.svg');
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;

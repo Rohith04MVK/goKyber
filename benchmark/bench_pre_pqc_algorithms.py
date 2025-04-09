@@ -109,6 +109,7 @@ def main():
     ax.set_xticklabels(algorithms, fontsize=12)
     ax.legend(fontsize=10)
     ax.grid(axis='y', linestyle='--')
+    ax.set_yscale("log")
 
     # Use format_time in autolabel
     def autolabel(bars):
