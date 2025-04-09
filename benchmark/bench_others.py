@@ -54,7 +54,7 @@ def main():
     times_data = [kyber1_times, kyber2_times]
 
     x = np.arange(len(algorithms))
-    width = 0.3
+    width = 0.2
 
     fig, ax = plt.subplots(figsize=(12, 8))
     bar1 = ax.bar(x - width, [t[0] for t in times_data], width, label='Kyber-512', color='skyblue')
@@ -67,6 +67,7 @@ def main():
     ax.set_xticklabels(algorithms, fontsize=12)
     ax.legend(fontsize=10)
     ax.grid(axis='y', linestyle='--')
+    ax.set_yscale("log")
 
     # Annotate bars with formatted times
     def autolabel(bars):
